@@ -1,0 +1,94 @@
+<HTML>
+<HEAD>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<script>wTitle()</script>
+</HEAD>
+<body>
+<h1>t5: Shift Operations</h1>
+<script>wNavbar()</script>
+<p> This tutorial displays some practical uses of the shift operator. It is often 
+  important to change the format of data, for communications, storage, or presentation. 
+  These format changes often involve shift, AND and OR operations arranged so 
+  as to move bits within one set of words into another. This particular program 
+  takes a string of octal digits, and converts them into an integer value. <IMG SRC="Image7.gif" WIDTH=254 HEIGHT=88 ALIGN="RIGHT" HSPACE=9 VSPACE=9> 
+</p>
+<P>The conversion process is illustrated in the example to the right. The original 
+  string "45", is to be interpreted as 45<sub>8</sub>, equivalent to 37<sub>10</sub>. 
+  Conveniently, the ASCII code for the digit '4' ends with the bits 100, which 
+  is the binary code for four. Likewise, the ASCII '5' ends in 101, which encodes 
+  five; this correspondence holds for all ASCII digits. When the two bit patterns 
+  are assembled together, the result, 100101<sub>2</sub>, is the bit pattern for 
+  37<sub>10</sub>. </P>
+<P>Note that the program really converts from octal to binary. Once the data is 
+  in native binary format, the C++ output library makes the binary-decimal 
+  conversion. The main program 
+  <a href="t5m.cpp" target="t5m">t5m.cpp</a> is unremarkable; 
+  but <a href="t5.s" target="t5">t5.s</a> merits some explanation: </P>
+<div class="hangingindent"> 
+  <P> 21: The immediate argument #7 has the binary pattern 00000111<sub>2</sub>,
+     i.e., the rightmost three bits of the word. ANDing this pattern with the
+    character in 
+    <span class="register">r2</span>
+    clears all but the rightmost three bits.</P>
+  <P>22: A lot happens in this one instruction! Beginning 
+    on the right, the shift operation 
+    <span class="sourcecode">lsl#3</span>
+    makes way for new bits by moving the previous bits of 
+    <span class="register">r1</span> three places
+    to the right. This is equivalent to multiplying 
+    <span class="register">r5</span> by 8, but the shift is
+    faster and, to experienced coders, more obvious. The shifted operand is then
+    OR'd with the three-bit pattern in 
+    <span class="register">r2</span>.</P>
+</div>
+<P> Make and run this program, and verify that it does indeed convert 45<sub>8</sub> 
+  to 37<sub>10</sub>, 100<sub>8</sub> to 64<sub>10</sub>, etc. Then, use gdb
+  to trace the operation of the program. Stepping through the loop, you should
+  be  able to watch the bits transferred from the string to
+  <span class="register">r2</span>, then ORed
+  into 
+  <span class="register">r1</span>. <b>Warning:</b> be sure to continue before
+  you execute line 29. When the address in <span class="register">r0</span> is
+  replaced by the return value, string display is no longer valid. The attempt
+  to display a string from an arbitrary address (e.g. 37) can crash gdb.</P>
+<P><b>Self-Test</b></P>
+<ol>
+  <li> (3) Assume this function is called with the string "631" as an argument.
+    List each change in the value of 
+    <span class="register">r5</span> that occurs during execution of the 
+    function.</li>
+  <li> (3) Note that nothing in the program actually checks that the string
+    is all octal digits. What number will the program return if the user enters
+    the string: <span class="userTyped">Hi!</span>?</li>
+  <li> (2) What's the largest octal number that can be processed correctly
+    by this program? What happens if you enter a (valid octal) number that is
+    too large or too small?</li>
+</ol>
+<P><b>Assignment</b></P>
+<ol class="assignment">
+  <li><span class="sourcecode">int BinToInt(char* S)</span> returns the integer represented by binary
+    string S.</li>
+  <li><span class="sourcecode">int DecToInt(char* S)</span> returns the integer represented by decimal
+      string S.<BR>
+    (Hint: don't shift, multiply)</li>
+  <li><span class="sourcecode">int HexToInt(char* S)</span> returns the integer represented by hexadecimal
+      string S.<BR>
+    (Hint: test for characters 'A'-'F', and convert them separately.)</li>
+  <li> <span class="sourcecode">void encode(char* P, char* C)</span> copies plaintext P to cyphertext C, changing
+      each character by rolling the lower five bits one position left. For example,
+    if P = "<span class="sourcecode">Hi.</span>", encode() would copy <span class="sourcecode">Dt'</span> into C, since:</li>
+<IMG SRC="encode.gif" WIDTH=266 HEIGHT=100 align="CENTER"><br>
+<li> <span class="sourcecode">void IntToOct(N, char* S)</span> copies into string S the octal representation
+     of N.</li>
+  <li><span class="sourcecode"> void IntToHex(N, char* S)</span> copies into string S the hexadecimal representation
+    of N.</li>
+  <li> <span class="sourcecode">void IntToBin(N, char* S)</span> copies into string S the binary representation
+of N.</li></ol>
+<P><b>Joke</b></P>
+<P class="hangingindent">Why do so many programmers confuse Halloween with Christmas? </P>
+<P class="hangingindent">Because 31<sub>Oct</sub> = 25<sub>Dec</sub></P>
+<script>writeFooter()</script>
+</BODY>
+</HTML>

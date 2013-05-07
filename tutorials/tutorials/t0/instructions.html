@@ -1,0 +1,383 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<script>wTitle()</script>
+</head>
+<body>
+<h1>t0: Programming the 
+  <script>writeLongMachineName()</script>
+</h1>
+<script>wNavbar()</script>
+<table border="1" align="right" cellspacing="0">
+  <tr>
+    <td align="right" valign="top"><pre>1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15</pre></td>
+    <td valign="top"><pre>
+<script>writeFullPrompt('~')</script> <span class="userTyped">cd</span>
+<script>writeFullPrompt('~')</script> <span class="userTyped">pwd</span>
+/home/csc/aardvarka
+<script>writeFullPrompt('~')</script> <span class="userTyped">ls</span>
+private  private  read_only
+<script>writeFullPrompt('~')</script>  <span class="userTyped">cd private/</span>
+<script>writeFullPrompt('private')</script> <span class="userTyped">cd csc2110/</span>
+<script>writeFullPrompt('csc2110')</script> <span class="userTyped">cd tutorials/</span>
+<script>writeFullPrompt('tutorials')</script> <span class="userTyped">cd t0/</span>
+<script>writeFullPrompt('t0')</script> <span class="userTyped">pwd</span>
+/home/csc/aardvarka/private/csc2110/tutorials/t0
+<script>writeFullPrompt('t0')</script> <span class="userTyped">ls</span>
+fib3.png           makefile           t0m.cpp<br>instructions.html  t0.c
+<script>writeFullPrompt('t0')</script> </pre></td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td><strong>Fig. 1:</strong> Command dialog to enter the first tutorial directory.</td>
+  </tr>
+</table>
+<p>This tutorial 
+  introduces the programming environment for the 
+  <script>writeLongMachineName()</script>
+(<script>wMAbr()</script>
+), and the
+  common file naming conventions for all the tutorials. </p>
+<p><strong>Issuing Commands: the Terminal Window</strong></p>
+<p>Begin by launching PuTTY (Windows) or Terminal (Mac). Use one of the following
+  links for instructions on using your connection:</p>
+<table border="0" align="center">
+  <tr>
+    <td align="center" width="300em"><a href="../help/putty.html" target="remote">PuTTY Instructions
+        (Windows)</a></td>
+    <td align="center" width="30em">&nbsp;</td>
+    <td align="center" width="300em"><a href="../help/terminal.html" target="remote">Terminal
+        Instructions (Mac)</a></td>
+  </tr>
+</table>
+<p>Using either set of instructions, you should arrive at a window with the RPi
+  prompt displayed as in Line 1 of the window at right. This is the prompt for <a href="http://www.gnu.org/software/bash/bash.html">bash</a>,
+   the Linux command shell program. </p>
+<p>The lines shown in the figure represent an initial dialog between you and
+  bash,  illustrating the commands: <a href="http://linux.die.net/man/1/cd" target="man">cd</a>, <a href="http://linux.die.net/man/1/pwd" target="man">pwd</a>,
+  and <a href="http://linux.die.net/man/1/ls" target="man">ls</a>. Commands you
+  type are <span class="userTyped">highlighted</span> in
+  the figure. The <a href="http://linux.die.net/man/1/cd" target="man">cd</a> comand,
+  all by itself, takes you to your home directory. <a href="http://linux.die.net/man/1/pwd" target="man">pwd</a> displays
+  the directory name, and <a href="http://linux.die.net/man/1/ls" target="man">ls</a> lists
+  the contents of a directory.</p>
+<p>This tutorial is in the directory, 
+  <span class="sourcecode">/home/csc/<script>writeUserName()</script>/private/csc2110/tutorials/t0</span>.
+    The four commands on lines 6-9 take you to that directory. The <span class="sourcecode">pwd</span> command
+      verifies that you are in the right place. The <span class="sourcecode">ls</span> command shows
+      you  the files in the current directory.</p>
+<strong>Editing files: the Browser Window</strong>
+<p>Begin by launching an SFTP client that has an integrated editor. You may use
+  one of thr programs described below, or your own:</p>
+<table border="0" align="center">
+  <tr>
+    <td align="center" width="300em"><a href="../help/winscp.html" target="help">WinSCP
+        Instructions (Windows)</a></td>
+    <td align="center">&nbsp;</td>
+  <td align="center" width="300em"><a href="../help/cyberduck.html" target="help">CyberDuck
+        Instructions (Mac)</a></td>
+  </tr>
+</table>
+<p>Within your SFTP client, navigate to the <span class="sourcecode">.../t0</span> directory. In general, it's
+  a good idea to keep your command prompt and your SFTP client pointed to the
+  same directory. The examples and assignments all use a common pair of files:
+  a main program, always in C++, and a function, usually in assembly. In this
+  case, the main program is 
+  <a href="t0m.cpp" target="t0m">t0m.cpp</a>,
+  and the function is in 
+  <a href="t0.c" target="t0">t0.c</a>.
+  Use  the editor to examine our first program file:</p>
+<p><strong>The <span class="sourcecode">main()</span> Program</strong></p>
+<table border="1" align="right" cellspacing="0">
+  <tr>
+    <td align="right" valign="top"><pre>1
+2
+3
+4</pre></td>
+    <td valign="top"><pre>// CSC 2110, Computer Organization<br>// Tutorial 0: The <script>writeLongMachineName()</script><br>// by William H. Hooper
+...</pre></td>
+  </tr>
+</table>
+<p>The screen at right shows the first few lines of <a href="t0m.cpp" target="source">t0m.cpp</a>.
+  As you read these instructions, use your SFTP client and remote file editor
+  to view your own copy of the file.</p>
+<p>This file is a fairly conventional C++ program, and most of it will look familiar 
+  to you. Some lines that may need explanation are: </p>
+<div class="hangingindent"> 
+  <p>1-7: <u>Every file you submit must include initial comments listing your
+       name, the course, and the assignment number, and a description of the
+      program  you are submitting.</u> Failure to include this header may cost
+  you some or all of your assignment grade.</p>
+  <p>9-12: Depending on your C++ text, you may have used <span class="sourcecode">&lt;iostream.h&gt;</span> rather
+     than <span class="sourcecode">&lt;iostream&gt;</span>. The latter is recommended by most authors nowadays,
+      but requires the <span class="sourcecode">namespace</span> declaration on line 9 if you wish
+      to  use <span class="sourcecode">cin</span> and <span class="sourcecode">cout</span> as global streams. The <span class="sourcecode">&lt;ctime&gt;</span> library is for
+      time  functions, described below.</p>
+  <p>14: Extern declarations glue two or more C/++ files into a single program,
+    allowing statements in one file to use data and functions in another. The
+    extern declaration, in this case <span class="sourcecode">Fib()</span>,  must exactly match  prototype
+    for the routine in the other file. Otherwise, the two parts
+    of your program will not link.</p>
+  <p>19-20, 28-31: To tell how fast our function executes, we are using
+    the <span class="sourcecode">clock_gettime()</span> utility. The declaration on lines 19-20 create
+    compatible variables. We call <span class="sourcecode">clock_gettime()</span> immediately
+    before and after the call to our test function, to get the most accurate
+    timing possible. Comparison of the time readings in start and finish gives
+    us an elapsed time. The data returned by <span class="sourcecode">clock_gettime()</span> could
+    be accurate to the nanosecond, but the actual precision on the
+<script>wMAbr()</script>
+is a few microseconds, and can be affected by other programs running on the
+same machine. </p>
+  <p>1-41: There is a small bug in this program. Don't fix it just yet; we will 
+  use the bug to get used to the edit-&gt;compile-&gt;test cycle in this environment.</p>
+</div>
+<p><strong>The Function</strong></p>
+<p>Open 
+  <a href="t0.c" target="t0">t0.c</a>
+  in another remote editing window. This file is even
+   simpler than the main program, but a few comments may help:</p>
+<div class="hangingindent"> 
+  <p>1-5: <u>Every file you submit must include initial comments listing your 
+    name, the course, the assignment number, and a description of the program 
+    you are submitting.</u></p>
+  <p>6: Note that this line should declare exactly the same function name and 
+    arguments, in the same order, as line 14 of t0m.cpp.</p>
+  <p>8-15: The Fib( ) function is an implementation straight out of an elementary
+     programming text. If it doesn't look familiar, look up &quot;fibonacci&quot; 
+    in a CS2 textbook. Lines 13-15 are usually written as a single statement;
+     we spread them out here, so we can trace the execution of each function
+    call  separately, and examine the results in j and k.</p>
+</div>
+<p><strong>Edit, Compile, Test </strong></p>
+<table border cellpadding=3 align=left bordercolor="#000000" cellspacing=0>
+  <tr valign="top"> 
+    <td valign="top"> 
+      <pre>[... t0]$ <span class="userTyped">make t0</span>
+gcc -g -c t0.c
+gcc -g -c t0m.cpp
+t0m.cpp: In function 
+ `int main(...)':
+t0m.cpp:29: implicit declaration
+ of function `int fib(...)'
+make: *** [t0m.o] Error 1
+[... t0]$ <span class="userTyped">make t0</span>
+gcc -g -c t0m.cpp
+c++ -o t0 t0.o t0m.o
+[... t0]$ <span class="userTyped">./t0</span>
+Fibonacci calculator, F(n)
+Please enter whole numbers, 'q' to quit.
+
+n> <span class="userTyped">5</span>
+Fib(5) = 8 computed in 7e-06 seconds 
+n> <span class="userTyped">30</span>
+Fib(30) = 1346269 computed in 0.1192 seconds 
+n> <span class="userTyped">q</span>
+[... t0]$ </pre>
+    </td>
+  </tr>
+</table>
+<p>To run this program, use your SSH client program. The commands you type are
+  underlined; the rest is produced in response. The command <span class="userTyped">make t0</span>,
+  attempts to compile your program, responding with the error message shown.
+  Switch to the window where you are editing t0m.cpp, correct the error on line
+  29, and save the file. Switch back to the SSH window, and re-enter the make
+  command; you will know the compilation is successful when the <span class="sourcecode">gcc</span> 
+  and <span class="sourcecode">c++</span> commands
+  complete without errors. 
+</p>
+<p>We now have a program named <span class="sourcecode">t0</span>, which we execute by 
+  typing <span class="sourcecode">./t0</span>. The program will prompt for a whole number, and print
+   the corresponding element in the Fibonacci sequence. Enter a non-integer to
+   quit.When the program quits, the command interpreter resumes, printing out
+  another 
+  <span class="sourcecode">[... t0]$</span> prompt. Run the program again, entering larger values
+  for N. How long does it take to compute the 25th fibonacci number? The 30th?
+  What is the largest fibonacci number you can compute in 10 seconds? If your're
+  curious,  you could compile this program on your desktop PC and compare the
+  running times  of the two platforms.</p>
+<table border cellspacing=0 cellpadding=3 align=right bordercolor="#000000">
+  <tr valign="top"> 
+    <td valign="top"> 
+      <pre>[... t0]$ <span class="userTyped">gdb t0</span>
+...
+Reading symbols from ... t0...done.
+(gdb) <span class="userTyped">break Fib</span>
+Breakpoint 1 at ..., line 11.
+(gdb) <span class="userTyped">break t0.c:16</span><br>Breakpoint 2 at ..., line 16.<br>(gdb) <span class="userTyped">run</span>
+...
+n&gt; <span class="userTyped">3</span>
+Breakpoint 1, Fib (i=3) at t0.c:11
+10        if (i &lt; 2)
+(gdb) <span class="userTyped">step</span>
+13        j = Fib(i-1);
+(gdb) <span class="userTyped"> </span>
+...
+Breakpoint 1, Fib (i=0) at t0.c:11
+11        if (i < 2)
+(gdb) <span class="userTyped"> </span>
+...
+Breakpoint 2, Fib (i=2) at t0.c:16
+16        return j + k;
+(gdb) <span class="userTyped">info locals</span>
+j = 1
+k = 1
+(gdb) <span class="userTyped">continue</span>
+...
+Breakpoint 1, Fib (i=1) at t0.c:11
+11        if (i &lt; 2)
+(gdb) <span class="userTyped"> </span>
+...
+Breakpoint 2, Fib (i=3) at t0.c:16
+16        return j + k;
+(gdb) <span class="userTyped">info locals</span>
+j = 2
+k = 1
+(gdb) <span class="userTyped">continue</span>
+...
+Fib(3) = 3 computed in 0.001506 seconds 
+n> <span class="userTyped">q</span>
+... exited normally]
+(gdb) <span class="userTyped">quit</span>
+[... t0]$</pre>
+</td>
+  </tr>
+</table>
+<p><a name="figure1"></a>Now that the program works, let's examine its behavior
+   in more detail. The transcript at right leads us through a short debugging
+  session.  We begin by typing the command <span class="userTyped">gdb</span> followed
+  by the name of the program  we wish to debug. The <a href="#gdb">gdb</a> program
+  prints a copyright notice,  followed by the prompt <span class="sourcecode">(gdb)</span>.
+  It is ready to run the program under  our control. </p>
+<p>To use a debugger well, we need to decide in advance what we want to watch
+   and when we want to see it. Otherwise, we will be overwhelmed by thousands
+  of  instructions, most of them doing things best taken for granted. The first <span class="userTyped">break</span> 
+  instruction targets the first executable line of the <span class="sourcecode">Fib()</span> function; the second
+  sets the breakpoint at line 16 of <a href="t0.c" target="t0">t0.c</a>.</p>
+<p>We type <span class="userTyped">r</span> or 
+  <span class="userTyped">run</span> to
+  run the program. It runs just as before, prompting us for <span class="sourcecode">n&gt;</span>.
+  Here we type in <span class="userTyped">3</span> and
+  press return. The program resumes  until it reaches our first breakpoint; then
+  it stops and gdb prints the current  argument and the statement about to be
+  executed. The <span class="userTyped">step</span> statement 
+  advances the program to the next executable line; in this case that line is
+   13. Pressing the return key repeats the step instruction; but before the program
+   reaches line 14 of the current function it must descend recursively into <span class="sourcecode">Fib(i=2)</span>.
+  During that descent, it stops again at Breakpoint 1.</p>
+<p>Stepping through even a short program like this quickly becomes tedious. The 
+  <span class="userTyped">continue</span> command causes the program to proceed
+  without stopping,  until it reaches a breakpoint, input pause, or exit point.
+  In this program,  the first breakpoint causes a stop each time we recursively
+  enter <span class="sourcecode">Fib()</span>. If 
+  we keeping pressing return, we will sped rapidly through these invocations,
+   until we finally reach the second breakpoint in the call to <span class="sourcecode">Fib(i=2)</span>.</p>
+<p>Another very useful feature of <span class="sourcecode">gdb</span> is its <span class="sourcecode">info</span> command. In our 
+  example, 
+  <span class="userTyped">info locals</span> prints out the values of 
+  <span class="sourcecode">j</span> and 
+  <span class="sourcecode">k</span>. More 
+  <span class="sourcecode">info</span> options are documented in the 
+  <a href="../intro.html" target="intro">Debugging with gdb</a>
+<p>Repeating the <span class="userTyped">continue</span> command eventually takes us past the last
+   breakpoint, to the point where the program prints out its answer and prompts
+   us for the next value. If we entered another number, we would descend into
+  another  set of recursive invocations, hitting our breakpoints as we go. By
+  entering  a non-number <span class="userTyped">q</span> we exit the program. We could also run
+  the program  again by typing <span class="userTyped">run</span> in response to the gdb prompt,
+  but likewise  we type <span class="userTyped">quit</span> to return to the bash prompt.</p>
+<p><b>Self Tests</b></p>
+<p><b><img src="fib3.png" width="200" height="255" align="right"></b>Since you 
+  are <u>not allowed to use the machines</u> at test time, you should try these 
+  exercises with pencil, paper, and calculator. You can then use the machine to 
+  check your answers and grade yourself.</p>
+<ol>
+  <li>(2) In the example run of <span class="sourcecode">Fib(i=3)</span>, how many times does the program reach 
+    Breakpoint 1? Breakpoint 2?</li>
+  <li>(3) The figure at right illustrates the calling chain for the example run 
+    of the program. Complete the figure by adding in the missing recursive calls, 
+    and complete the missing variable and/or return values in each context.</li>
+  <li> (1) If you were to run <span class="sourcecode">Fib(i=4)</span>, how many times would the program reach 
+    Breakpoint 1? </li>
+  <li>(4) If you were to run <span class="sourcecode">Fib(i=4)</span>, what would the values of <span class="sourcecode">j</span> and <span class="sourcecode">k</span> be, each 
+    time the program reached Breakpoint 2?</li>
+</ol>
+<p><b>Assignment</b></p>
+<p>You will be assigned one of the following functions in class; and you are
+  encouraged  to do as many others as you need. Write a RECURSIVE solution to
+  your function,  even if a nonrecursive solution seems easier. You will need
+  the recursive code  in a later tutorial. Submit <b>t0s</b><u><em>x</em></u><b>.c</b>, <b>t0s</b><u><em>x</em></u><b>m.cpp</b>,
+  and <b>t0s</b><u><em>x</em></u><b>.log</b>.</p>
+<ol class="assignment">
+  <li><span class="sourcecode">int power(m, n)</span> returns <span class="sourcecode">m<sup>n</sup></span>, where <span class="sourcecode">n</span> is a nonnegative integer.</li>
+  <li><span class="sourcecode">int len(char* S)</span> returns the length of <span class="sourcecode">char*
+      S</span> (<a href="#strings">see
+      the note on strings below</a>).</li>
+  <li><span class="sourcecode">void copy(S, R)</span> copies each character from <span class="sourcecode">char*
+      S</span> to <span class="sourcecode">char* R</span> (<a href="#strings">see
+      the note on strings below</a>).</li>
+  <li><span class="sourcecode">int C(n,k)</span> returns the number of ways to choose <span class="sourcecode">k</span> items from <span class="sourcecode">n</span> total, where
+     <span class="sourcecode">0 &lt;= k &lt;= n</span>. <span class="sourcecode">C(n, 0) = C(n, n) = 1</span>, otherwise <span class="sourcecode">C(n, k) = C(n-1, k-1)
+      + C(n-1, k)</span></li>
+  <li><span class="sourcecode">int fact(int n)</span> returns n factorial</li>
+  <li><span class="sourcecode">int H(int n)</span> returns the number of moves required to move a tower of Hanoi
+    with <span class="sourcecode">n&gt;0</span> disks. <span class="sourcecode">H(1)
+    = 1</span>, otherwise <span class="sourcecode">H(n) = 2*H(n-1) + 1</span></li>
+  <li><span class="sourcecode">int gcd(int a, int b)</span> returns the greatest common denominator of <span class="sourcecode">a</span> and
+    <span class="sourcecode">b</span></li>
+</ol>
+<p>To begin, note the letter <u>x</u> of your assigned problem, and use the following 
+commands to create the files you need:</p>
+  <pre>cp t0.c t0s<u>x</u>.c
+cp t0m.cpp t0s<u>x</u>m.cpp </pre>
+<p>Use your remote editor to rewrite <strong>t0s</strong><em>x</em><strong>.c</strong> with
+  the proper comments and definition for the function <u>x</u> above. Then,
+  rewrite <strong>t0s</strong><em>x</em><strong>m.cpp</strong>, revising the comments, supplying the function prototype,
+    prompting  for the arguments, and calling the function. Compile, run and
+    (if necssary)  debug your program with the commands:</p>
+<pre>make t0s<u>x</u>
+./t0s<u>x</u>
+gdb t0s<u>x</u></pre>
+<p>When you have run and tested your program and found it to work correctly, email
+<strong>t0s</strong><em>x</em><strong>.c</strong> and <strong>t0s</strong><em>x</em><strong>m.cpp</strong> to:</p>
+<pre><a href="mailto:william.hooper@belmont.edu?subject=t1sa"">To: william.hooper@belmont.edu
+Subject: t0s<em>x</em></a></pre>
+<p><strong><a name="strings"></a>A quick introduction to strings</strong></p>
+<p>In C (and C++), a string is simply a pointer to consecutive
+  bytes in memory, ending in zero. For example, the statement:</p>
+<pre>char* s = &quot;Hello&quot;;</pre>
+<p>creates a pointer <span class="sourcecode">s</span> to six bytes of memory: 0x48, 0x65, 0x6c, 0x6c, 0x6f,
+  0x00. The 'null' character, 0x00, marks the end of the string. Notice that
+  different pointers can use the same characters to list overlapping strings.
+  For example:</p>
+<pre>char* t = s + 1;</pre>
+<p>causes <span class="sourcecode">t</span> to represent the string &quot;ello&quot;, and:</p>
+<pre>t[3] = 'p';</pre>
+<p>changes <span class="sourcecode">t</span> to &quot;ellp&quot; and <span class="sourcecode">s</span> to &quot;Hellp&quot;. Plenty of references
+  to C strings exist; the <a href="http://en.wikipedia.org/wiki/C_string_handling" target="help">Wikipedia
+entry</a> is not a bad place to start, although you can ignore the wide string
+information for these tutorials.</p>
+<p><b>Still Curious?</b></p>
+<p>From this brief tutorial, you may know <i>what</i> to type, but not why you
+   are typing it. An expanded discussion of each command used in the tutorial
+  is  in <a href="../help/bash.html" target="help">bash.html</a>. Further guidance
+  is accumulating in <a href="../help/faq.html" target="help">faq.html</a>. 
+  Your email, phone and face-to-face questions are also welcome!</p>
+<script>writeFooter()</script>
+</body>
+</html>

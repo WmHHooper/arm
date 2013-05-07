@@ -1,0 +1,139 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<title>gdb Commands</title>
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+<h1>GDB Quick Reference</h1>
+<script>wNavbar()</script>
+<p>gdb is the GNU Debugger. A <a href="http://www.gnu.org/software/gdb/gdb.html">complete 
+  online manual</a> is available on the web for the latest version. Below is a 
+  list of the gdb commands and arguments used in these tutorials, with a brief 
+  explanation of each. The gdb command is the first word; the letters of the word 
+  in brackets may be omitted. Arguments to the command are shown in italics.</p>
+<table BORDER cellspacing=1 cellpadding=5 hspace=9 vspace=9 align="center">
+  <tr> 
+    <td valign="TOP"> 
+      <p><b>Command</b> 
+    </td>
+    <td valign="TOP"> 
+      <p><b>Explanation</b> 
+    </td>
+  </tr>
+  <tr> 
+    <td valign="TOP"> 
+      <p>h[elp] 
+    </td>
+    <td valign="TOP"> 
+      <p>list a summary of gdb command categories, and explain how to get more 
+        help. 
+    </td>
+  </tr>
+  <tr> 
+    <td valign="TOP">br[eak]&nbsp;<i>Address</i></td>
+    <td valign="TOP">set a breakpoint at <i>Address</i>. <i>Address</i> may be 
+      a number (e.g., 0x02000B7C) or a label (e.g., main).</td>
+  </tr>
+  <tr> 
+    <td valign="TOP"> 
+      <p>r[un]</p>
+      <p>c[ontinue]</p>
+    </td>
+    <td valign="TOP"> 
+      <p>Load and run the program. After a break, continue resumes the program, 
+        while run starts it over. Once the program starts or resumes, gdb loses 
+        control until the program reaches a breakpoint, quits, crashes, or is 
+        interrupted by the user (e.g. by pressing Fn-C). 
+    </td>
+  </tr>
+  <tr> 
+    <td valign="TOP"> 
+      <p>si <i>N</i> </p>
+      <p>step <i>N</i></p>
+    </td>
+    <td valign="TOP"> 
+      <p><u>S</u>tep forward through <i><u>N</u></i> consecutive machine <u>I</u>nstructions.
+         If omitted, N defaults to 1. For programs written in C/++ and compiled
+         with <span class="sourcecode">gcc -g</span>, 
+         <span class="userTyped">step</span> steps through one line of
+         source code. 
+    </td>
+  </tr>
+  <tr> 
+    <td valign="TOP"> 
+      <p>p[rint]<i>&nbsp;/fmt expression</i></p> 
+    </td>
+    <td valign="TOP"> 
+      <p>display the value of <i>expression</i>, using <i>/fmt</i>. Common expressions 
+        are names of variables and functions, register values
+        <span class="sourcecode">$r0..$r12</span>,
+        <span class="sourcecode">$sp</span>,
+        <span class="sourcecode">$lr</span>,
+        <span class="sourcecode">$pc</span>,
+        <span class="sourcecode">$s0..$s31</span>, and
+        <span class="sourcecode">$d0..$d15</span>.
+        Common formats are: 
+        <span class="sourcecode">/d</span> for decimal, 
+        <span class="sourcecode">/x</span> for hexadecimal, 
+        <span class="sourcecode">/s</span> for string, and 
+        <span class="sourcecode">/i</span> for instruction. 
+        More elaborate formats are given in the references. 
+    </td>
+  </tr>
+  <tr> 
+    <td valign="TOP"> 
+      <p>x <i>&nbsp;/fmt &nbsp;Address</i> 
+    </td>
+    <td valign="TOP"> 
+      <p>display memory, formatted according to <i>/fmt</i>, beginning at <i>Address</i>. 
+        /fmt has the same options as the print command. 
+    </td>
+  </tr>
+  <tr> 
+    <td valign="TOP"> 
+      <p>disp[lay]<i>&nbsp;/fmt expression</i>
+      <p>undisp[lay]&nbsp;<i>Number</i>
+    </td>
+    <td valign="TOP"> 
+      <p>add <i>expression</i> and <i>/fmt</i> to the display list. Items on the 
+        list are displayed after each break. <i>/fmt</i> has the same options 
+        as in the print command. undisplay removes item <i>Number</i> from the 
+        display list; if <i>Number</i> is omitted, the display list is cleared.
+    </td>
+  </tr>
+  <tr> 
+    <td valign="TOP"> 
+      <p>disas[semble]&nbsp;<i>Address</i></p>
+    </td>
+    <td valign="TOP"> 
+      <p>disassemble instructions. The optional <i>Address</i> allows you to dissassemble 
+        from some other location than the current PC; otherwise, it will disassemble 
+        the current function 
+    </td>
+  </tr>
+  <tr> 
+    <td valign="TOP"> 
+      <p>info <i>option</i> 
+    </td>
+    <td valign="TOP"> 
+      <p>displays misc info about the debugging environment. Some useful <i>option</i>s 
+        are: <span class="sourcecode">stack</span>, 
+        <span class="sourcecode">locals</span>, and 
+        <span class="sourcecode">frame</span>.
+    </td>
+  </tr>
+  <tr> 
+    <td valign="TOP"> 
+      <p>quit 
+    </td>
+    <td valign="TOP"> 
+      <p>exit gdb, killing the program if it is running. 
+    </td>
+  </tr>
+</table>
+<script>writeFooter()</script>
+</body>
+</html>

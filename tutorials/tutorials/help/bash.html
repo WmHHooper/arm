@@ -1,0 +1,116 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<script>wTitle()</script>
+</head>
+
+<body bgcolor="#FFFFFF" text="#000000">
+<h1>Bash Quick Reference</h1>
+<script>wNavbar()</script>
+
+<p>When you open a terminal window, you are actually running a program called
+  Bash. Bash is an example of a command-line shell, a program that reads what
+  you type and runs the corresponding programs. Usually your typing is read a
+  line at a time; the first word on the line is treated as a <i>command</i>,
+  while the words that follow are <i>arguments</i>. 
+  Even on a small system like the 
+  <script>writeLongMachineName()</script>, 
+  there are hundreds of bash commands, 
+  and each command has its own rules for processing arguments. Moreover, each 
+  program you write this semester will add a new command to your own, local dialect.</p>
+<p>Below is a list of the bash commands used in these tutorials. The commands
+   are listed in the order they appear in the tutorials. Each is command listed
+   with typical arguments in italics, followed by a brief explanation of what
+  it  does. In many cases, there are links to further information. A complete
+  reference to the Bash language is found in the <a href="../intro.html#bash" target="intro">Bash Reference Manual</a> online.</p>
+<p><b><a name="cd"></a>cd</b> <i>folder</i></p>
+<p>changes the current directory to <i>folder</i>. The current directory is the 
+  equivalent to the open folder in a Windows Explorer or Macintosh Finder window. 
+  Files in the current directory are easy to find and manipulate, so you almost 
+  always begin a tutorial by changing to the proper directory. Note that you can 
+  tell each change is successful, because bash changes its prompt to reflect the 
+  current directory. Typing <b>cd</b> with no argument takes you to the home folder, 
+  /home/csc/<i>user</i>. Typing 
+  <span class="userTyped">cd ..</span> takes you to the enclosing folder (e.g.,
+  from t0 back to tutorials). </p>
+<p><b><a name="pwd"></a>pwd</b></p>
+<p>prints the complete pathname of the current directory. If you mistype a <a href="#cd">cd</a> 
+  command and get lost, pwd will help you find the way back. </p>
+<p> <b><a name="ls"></a>ls</b></p>
+<p>lists all the non-hidden files in the current directory. This command has many 
+  options, but the simple version is adequate for these tutorials. A list of typical 
+  files follows: the names in <b>bold</b> are the ones you should be sure to locate 
+  before you begin, while names in italics are of less essential files:</p>
+<ul>
+  <li><b>t0m.cpp</b> - source code for a conventional C++ program.</li>
+  <li><b>t0.cpp </b><i>or</i><b> </b><b>t0.c </b><i>or</i><b> t0.s</b> - source 
+    code for a function written in C++, C or assembly.</li>
+  <li><b>makefile</b> - contains the rules for turning the C++ and assembly files 
+    into a running program.</li>
+  <li><b>gdb.ini</b> - contains the settings to debug the current program.</li>
+  <li><i>t0m.o, t0.o</i> - object files compiled from the source code.</li>
+  <li><i>t0</i> - the executable program</li>
+  <li><strong>t1v1.s</strong>, <em>t1v1.o</em>, <em>t1v1</em> - some programs
+    exist in multiple versions, to follow successive stages of optimization.</li>
+  <li><i>instructions.html</i> - these instructions</li>
+  <li><i>other</i> - illustrations and other junk</li>
+</ul>
+<p>These tutorials use a naming convention that keeps file names short, but unique. 
+  The files necessary to begin Tutorial 0 are in the folder t0, etc. The cast 
+  will grow to include:</p>
+<ul>
+  <li><b>t0s</b><u>x</u><b>m.cpp</b> - source code of your main program, for assignment 
+    <u>x</u>.</li>
+  <li><b>t0s</b><u>x</u><b></b><b>.c </b><i>or</i><b> 
+    t0s</b><u>x</u><b></b><b>.s</b> - source code for your function in C
+    or assembly language, for assignment <u>x</u>.</li>
+  <li><i>t0s<u>x</u>m.o, t0s<u>x</u>.o</i> - your object files, compiled from 
+    the source code.</li>
+  <li><i>t0s<u>x</u></i> - your executable program</li>
+</ul>
+<p><b><a name="make"></a>make</b> <i>program</i></p>
+<p>compiles and links the sourcefiles to make <i>program</i>. It can be complex
+   to compile and link files in different languages, so we use the <span class="sourcecode">make</span> 
+  program, along with rules written especially for this tutorial to issue these
+   commands for us. Make is a very complex program, and writing makefiles is
+  a  subtle art. You can learn more about make from the 
+  <a href="../intro.html#make" target="intro">GNU `make'</a> reference online.
+  If you stick to the naming conventions for tutorial assignments, the rules
+  in your makefile should be adequate to compile and link your programs, with
+  the hooks you need to run and debug them. </p>
+<p>If you are trying to make a program named t5sd, for example, you will type 
+  the make command and see </p>
+<p><b><a name="gcc"></a>gcc</b> <i>options sourcefile</i></p>
+<p>translates <i>sourcefile</i> to object code. For these tutorials, you do not 
+  have to type the gcc commands yourself; the <a href="#make">make</a> program 
+  figures out, based on the program you want to make, which sourcefiles to translate 
+  and what options you need. If this command fails, it is usually because of a 
+  syntax error in <i>sourcefile</i>.</p>
+<p><b><a name="gcc"></a>c++</b> <b>-o</b><i> program objectfile objectfile</i></p>
+<p>links the <i>objectfiles</i> together to form a complete <i>program</i>. For 
+  these tutorials, you do not have to type the c++ commands yourself; the <a href="#make">make</a> 
+  program figures out, based on the <i>program</i> you want to make, which <i>objectfiles</i> 
+  to link. If this command fails, it is usually because the name or arguments 
+  of a function in one sourcefile do not match those in another.</p>
+<p><a name="program"></a><font face="Courier New, Courier, mono"><b>./<i>program</i></b></font></p>
+<p>runs <i>program</i>. Once you create an executable program in Linux, it is 
+  instantly part of the environment, and you can use your new program by typing 
+  its name, the same way that you use make, kate, or any other program in your 
+  linux system. The only hitch is a security feature--we don't want some hacker 
+  to write a program that deletes all your files, name it <span class="sourcecode">make</span> or 
+  <span class="sourcecode">ls</span> and put it where you might execute it accidentally. The prefix 
+  <span class="sourcecode">./</span> in front of your program name ensures that you will execute the 
+  program in your current directory.</p>
+<p><a name="gdb"></a><b>gdb</b> <i>program</i></p>
+<p>debugs <i>program</i> with the GNU Debugger. Like <a href="#make">make</a>,
+   it is a large, complex program for debugging large projects in many different
+   languages. A short list of gdb commands is listed in <a href="gdb.html" target="gdb">gdb.html</a>;
+    a more comprehensive reference is  <a href="../intro.html#gdb" target="intro">Debugging with gdb</a>.</p>
+<p><b><a name="cp"></a>cp</b> <i>oldfile</i> <i>newfile</i><font face="Courier New, Courier, mono"><b><i></i></b></font></p>
+<p>copies <i>oldfile</i> to <i>newfile</i>. In Linux, even a simple command like 
+  cp has dozens of optional arguments, but the simple one should work for now.</p>
+<script>writeFooter()</script>
+</body>
+</html>

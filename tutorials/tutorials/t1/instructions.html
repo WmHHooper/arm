@@ -1,0 +1,287 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<script>wTitle()</script>
+</head>
+<body>
+<h1> t1: Introducing Assembly</h1>
+<script>wNavbar()</script>
+<p>This tutorial is our introduction to the 
+  <script>writeLongMachineName()</script>
+assembly language, and to
+  the  linking conventions we will use to link C++ and assembly into a single
+  program.  As in our first tutorial, the program is divided into halves: a main
+  program  and a function. The main program, 
+  <a href="t1m.cpp" target="t1m">t1m.cpp</a>, looks
+  very  similar to the main program in the first tutorial. Open it with your
+  text editor and note a few differences:</p>
+<div class="hangingindent"> 
+<p>11: We declare the assembly routine, in this case <span class="sourcecode">ftoc()</span>, as an external 
+  "C" function, even though it's actually written in Assembly.This function has
+  one argument, and returns an integer result. if we fail to write this declaration
+  correctly, the two parts of the program will not link, or the values will not
+  be passed or returned correctly.</p>
+<p>18: <span class="sourcecode">ftoc()</span> is called as any function written in C++ would be. Here it is passed 
+  the Fahrenheit temperature as an <span class="sourcecode">int</span>, and expected to return the Centigrade 
+  temperature as another <span class="sourcecode">int</span>. As in the first tutorial, the function call is placed 
+  in a loop, so that we can call the function as many times as we wish without 
+  restarting the program.</p>
+</div>
+<p>In contrast with our main file, the function definiton is very different;
+  and  the difference begins with the name. In the name <a href="t1.s" target="t1">t1.s</a>, the
+  suffix <a href="t1.s" target="t1">.s</a> means
+  that the file is in assembly. Open <a href="t1.s" target="t1">t1.s</a>,
+   and observe:</p>
+<div class="hangingindent"> 
+<p>1-8: Comments begin with an "@" character, and end at the end of the line. 
+  <u>Every file you submit must include initial comments listing your name, the 
+  course, and the assignment number, and that describe the program you are submitting.</u></p>
+<p>10-13: These directives begin assembly of the program in a code segment, ensure
+   that instructions are written at even addresses, and declare <span class="sourcecode">ftoc</span> 
+  as a function that can be called from another file. For now, just keep in mind
+  that you will need to begin every program with the same four instructions,
+  and that you must use exactly the same name--in this case, "ftoc"--that
+  is declared  in the C++ program.</p>
+<p>16-19: The next 4 lines are assembly language instructions, as described in
+   Appendix D of <a href="../intro.html#ref" target="intro">the text</a> and
+   in the 
+   <a href="../intro.html#ref" target="intro">ARM Developer Suite Assembler Guide</a>.
+   They take the value in register 
+   <span class="register">r0</span>, apply the conversion formula to it, and
+   put the result back into 
+   <span class="register">r0</span>. If you are writing a function with more
+   than one argument, the arguments are found in registers 
+   <span class="register">r0</span>, 
+   <span class="register">r1</span>, 
+   <span class="register">r2</span>, ... etc.<br>
+   <br>
+   The arithmetic here warrants a special note. The ARM processor in the
+   <script>writeLongMachineName()</script> 
+has
+   no built-in division unit, so we cannot divide by 9. Instead we note that
+   <span class="sourcecode">5/9 &lt;=
+   0.10001111<sub>2</sub> = 0x8F</span>. Therefore, multiplying an integer by
+   0x8F and shifting the binary point left 8 bits approximates muktiplication
+   by 5/9. The use of fixed-point arithmetic is described in more detail in 
+   <a href="../intro.html#ref" target="intro">Fixed Point Arithmetic on the ARM</a>.</p>
+<p>21: This instruction returns control to the main program, much like a <span class="sourcecode">return</span> 
+  statement in C++.</p>
+<p>23-25: These assembly directives indicate
+  the length of the function, and put identification directly into the program
+  object code. <u>Every
+  program you compile must include identification of your name, the course, and
+  the assignment.</u></p>
+</div>
+<table border="1" align="left" cellpadding="3" cellspacing="0" bordercolor="#000000">
+  <tr> 
+    <td><pre>...t1]$ <span class="userTyped">make t1</span>
+gcc  -c t1.s
+gcc -g  -c t1m.cpp
+./t1c++  -o t1 t1.o t1m.o
+[local@alarmpi t1]$ <span class="userTyped">./t1</span>
+Convert temperatures, F to C
+Please enter integers, 'q' to quit.
+
+F> <span class="userTyped">32</span>
+32 F = 0 C
+F> <span class="userTyped">68</span>
+68 F = 20 C
+F> <span class="userTyped">-40</span>
+-40 F = -41 C
+F> <span class="userTyped">q</span>
+... t1]$ </pre></td>
+  </tr>
+</table>
+<p>The dialog to create and run this program is almost identical to that in
+  <script>writeNamedTutorial('fib1')</script>. 
+  The command <span class="userTyped">make t1</span> causes the compiler to translate 
+  <a href="t1.s" target="t1">t1.s</a> and 
+  <a href="t1m.cpp" target="t1m">t1m.cpp</a>
+  into object code, then link the objects together. If the process 
+  completes without error, we have an executable program named <span class="sourcecode">t1</span>, 
+  which we execute by typing <span class="sourcecode">./t1</span>. </p>
+<p>The program will prompt for a temperature in Fahrenheit, and reply with the
+   Centigrade equivalent --rounded down to the next integer. Enter some temperatures,
+   and use a calculator to check that your copy of the program makes the correct
+   conversion. Enter a 'q' to quit.When the program quits, the command
+   interpreter resumes, printing out another <span class="sourcecode">...t1]$</span> prompt.</p>
+<table border cellspacing=0 cellpadding=3 align=right bordercolor="#000000">
+  <tr valign="top"> 
+    <td valign="top"> <pre>
+... t1]$ <span class="userTyped">gdb t1</span>
+...
+Reading symbols from ... /t1...done.
+(gdb) <span class="userTyped">break ftoc</span>
+Breakpoint 1 at 0x8854
+(gdb) <span class="userTyped">run</span>
+Starting program: ...t1 
+...
+F> <span class="userTyped">68</span>
+Breakpoint 1, 0x00008854 in ftoc ()
+7: /x $r0 = 0x44
+...
+1: x/i $pc
+=> 0x8854<ftoc>:           sub r1, r0, #32
+(gdb) <span class="userTyped">si</span>
+0x00008858 in ftoc ()
+7: /x $r0 = 0x44
+6: /x $r1 = 0x24
+...
+=> 0x8858 &lt;ftoc+4>:  mov r2, #143
+(gdb) <span class="userTyped"> </span>
+0x0000885c in ftoc ()
+...
+5: /x $r2 = 0x8f
+...
+=> 0x885c &lt;ftoc+8>:  mul r3, r2, r1
+(gdb) <span class="userTyped"> </span>
+0x00008860 in ftoc ()
+...
+6: /x $r1 = 0x24
+5: /x $r2 = 0x8f
+4: /x $r3 = 0x141c
+...
+=> 0x8860 &lt;ftoc+12>: asr r0, r3, #8
+(gdb) <span class="userTyped"> </span>
+0x00008864 in ftoc ()
+7: /x $r0 = 0x14
+...
+4: /x $r3 = 0x141c
+=> 0x8864 &lt;ftoc+16>: mov pc, lr
+(gdb) <span class="userTyped">continue</span>
+Continuing.
+68 F = 20 C
+F> <span class="userTyped">q</span>
+... exited normally]
+(gdb) <span class="userTyped">quit</span>
+... t1]$ </pre>
+    </td>
+  </tr>
+</table>
+<p><a name="figure1"></a>Now that the program works, let's examine its behavior
+   in more detail. To use a debugger well, we need to decide in advance what
+  we  want to watch and when we want to see it. Otherwise, we will be overwhelmed
+   by thousands of instructions, most of them doing things best taken for granted.
+   This debugger has already been set up to watch the first five registers and
+   the program counter. Our first command, &quot;<span class="userTyped">break
+   ftoc</span>&quot;, tells the
+   debugger to stop at the beginning of the ftoc() function. </p>
+<p>Enter <span class="userTyped">r</span> or <span class="userTyped">run</span> to
+  run the program. It runs just as before, prompting us for a temperature. Here
+  we type in <span class="userTyped">68</span>, one of the
+  tempratures we tried before. When the program reaches our breakpoint, it stops
+  and gdb prints out the values of various registers. </p>
+<p>Once you begin reading the gdb output, you can follow your programs
+   precisely. The other registers are unimportant just yet; the critical ones
+  are
+  <span class="register">r0</span>, where the temperature is stored (68 = 0x44), and the 
+  <span class="register">pc</span> which points
+  to  the next instruction. This instruction, 
+  <span class="sourcecode">sub r1, r0, #32</span> happens
+   to be first instruction in the function ftoc(). </p>
+<p>Enter <span class="userTyped">si</span>. The program 
+  <span class="userTyped">s</span>teps
+  forward, executing one <span class="userTyped">i</span>nstruction and
+  printing the new values. Comparing registers
+  <span class="register">r0</span> and
+  <span class="register">r1</span>, we see that
+  <span class="register">r1</span> indeed contains
+  <span class="register">r0</span> - 32 (68 - 32 = 36 = 0x24). Meanwhile, the 
+  <span class="register">pc</span>has moved, and is
+  ready to execute the <span class="sourcecode">ldr</span> instruction.</p>
+<p>Step through the next 3 instructions by pressing <span class="userTyped">Enter</span> at
+  the prompt, observing the changes as you go. The fraction 5/9, approximately
+  143/256, is loaded into
+<span class="register">r2</span>. Multiplying 143 x 36 produces 5148 = 0x141c which
+  is stored in
+<span class="register">r3</span>. Shifting 0x141c right by 8 bits divides the number by 256,
+  yielding 0x14 = 20, which is placed in
+<span class="register">r0</span>. What could be easier!</p>
+<p>We do not want to step through the instructions in main, so  enter 
+   <span class="userTyped">cont</span> or 
+   <span class="userTyped">continue</span>.
+   This resumes the program, which correctly displays the Centigrade conversion,
+   and prompts for another Fahrenheit temperature. </p>
+<p> Repeat this process with a different temperature. Look up each 
+  instruction, predict what change it will make in the registers, then step through
+  the instruction and verify that the change was made. When you reach the 
+  <span class="sourcecode">mov pc, lr</span>
+  instruction, the correct Fahrenheit temperature (in hex) will be in
+<span class="register">r0</span>, and
+  when you enter 
+  <span class="userTyped">cont</span> the corresponding decimal value will appear.</p>
+<p><b>A Note on Registers</b></p>
+<p>This function uses four registers,
+  <span class="register">r0</span>-<span class="register">r3</span>. 
+  There are 16 registers in all, but
+  you must handle the upper 12 with care. Details are found on p.14 of the 
+  <a href="../intro.html#ref" target="intro">Procedure Call Standard for the ARM Architecture</a>, 
+  and will be dealt with in a later
+  tutorial, but  if you can stick to
+  <span class="register">r0</span>-<span class="register">r3</span> 
+  your code will be simpler.</p>
+<p><b>Self Tests</b></p>
+<p>Since you are <u>not allowed to use the machines</u> at test time, you should
+   try these exercises with pencil, paper, and calculator. You can then use the
+   machine to check your answers and grade yourself. Numbers in parenthesis ()
+   indicate the approximate value the question would have on a test, and is therefore
+   a guide to the amount of work required.</p>
+<ol>
+  <li>(4) Suppose the program is run, and the user enters a value of 35 when
+    prompted  for a Fahrenheit temperature. List <u>each value</u> stored in
+    registers
+<span class="register">r0</span>,
+<span class="register">r1</span>,
+<span class="register">r2</span>, and
+<span class="register">r3</span>, in hex, during the execution of the function
+    ftoc(). </li>
+  <li> (2) Assume that arguments a, b, and c are passed to the following function.
+    Write out the formula computed by its instructions.
+<pre>
+mul r4, r2, r2
+mul r5, r0, #4
+mul r5, r5, r3
+sub r0, r4, r5</pre></li>
+<li>(2+) Enter various positive and negative temperatures.  Integer arithmetic
+  seldom produces exact answers, but  you will notice a consistent
+  error in the conversion process. Modify ftoc()
+  to produce the closest integer approximation of the correct Centigrade temperature. (We
+  have not covered branches, and no conditional expressions are needed for a
+  solution, just some math. :-)</li>
+</ol>
+<p><b>Assignment</b></p>
+<p>You will be assigned one of the following functions in class; you are encouraged
+  to do as many others as you need. </p>
+<p>In the C++ file, change the main program to prompt for the arguments needed, 
+  call the function by the name listed, and print the value returned.</p>
+<ol class="assignment">
+  <li><img src="trap.gif" width="71" height="61" hspace="10" align="right"><span class="sourcecode">int
+     average(a, b, c, d)</span> returns the average of a, b, c, and d (hint: to divide
+     by 4, shift 2 bits right).</li>
+  <li><span class="sourcecode">int inches(f, i)</span> returns the total number of inches corresponding to f feet, 
+    i inches.</li>
+  <li><span class="sourcecode">char lower(char c)</span> returns the lowercase equivalent of c.&#9;</li>
+  <li><span class="sourcecode">int remainder(n, d)</span> returns the remainder
+    of n divided by d.</li>
+  <li><span class="sourcecode">int parabola(x)</span> returns the value x2 - 3x + 2.</li>
+  <li><span class="sourcecode">int trap(b1, b2, h)</span> returns the area of a trapezoid as shown:</li>
+  <li><span class="sourcecode">int kinetic(m,v)</span> returns the kinetic energy of an object of mass m and velocity 
+    v. </li>
+</ol>
+<p>To begin, copy the files 
+  <a href="t1m.cpp" target="t1m">t1m.cpp</a> and 
+  <a href="t1.s" target="t1">t1.s</a>, 
+  and rename the copies <b>t1s</b><i>x</i><b>m.cpp</b> and <b>t1s</b><i>x</i><b>.s</b>,
+  replacing the <i>x</i><b> </b>with the letter of the problem you are assigned.
+Edit <b>t1s</b><i>x</i><b>.s</b> to implement the new function, and <b>t1s</b><i>x</i><b>m.cpp</b> to
+prompt for values, call the function and print the result, in the same kind of
+loop as <strong>t1m.cpp</strong>. When you have run and tested your program and
+found it to work correctly, email <b>t1s</b><i>x</i><b>m.cpp</b> and <b>t1s</b><i>x</i><b>.s</b> to:</p>
+<pre><a href="mailto:william.hooper@belmont.edu?subject=t1sa"">To: william.hooper@belmont.edu
+Subject: t1s<em>x</em></a>
+</pre>
+<script>writeFooter()</script>
+</body>
+</html>

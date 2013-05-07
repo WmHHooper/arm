@@ -1,0 +1,404 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<script>wTitle()</script>
+</head>
+<body>
+<h1>t6: Stack Frames and Subroutines </h1>
+<script>wNavbar()</script>
+<table border="1" cellpadding="5" align="right" cellspacing="0">
+  <tr bgcolor="#cccccc"> 
+    <td>...</td>
+    <td colspan="2">&nbsp;</td>
+  </tr>
+  <tr bgcolor="#cccccc"> 
+    <td> 
+      <p>stack<br>
+        frame<br>
+        for<br>
+        Fib(i-1)</p>
+    </td>
+    <td colspan="2">&nbsp;</td>
+  </tr>
+  <tr> 
+    <td> 
+      <p>stack<br>
+        frame<br>
+        for<br>
+        Fib(i) </p>
+    </td>
+    <td> 
+      <p align="right">sp:<br>
+        <br>
+        fp-16:<br>
+        fp-12:<br>
+        fp-8:<br>
+        fp-4:<br>
+        fp:</p>
+    </td>
+    <td> 
+      <p align="center">...<br>
+        <br>
+        i<br>
+        k<br>
+        j<br>
+        old fp<br>
+    old lr</p></td>
+  </tr>
+  <tr bgcolor="#cccccc"> 
+    <td>stack<br>
+      frame<br>
+      for<br>
+      Fib(i+1)</td>
+    <td valign="top"> 
+      <div align="right"></div>
+    </td>
+    <td bgcolor="#cccccc" valign="top">&nbsp;</td>
+  </tr>
+  <tr bgcolor="#cccccc"> 
+    <td>...</td>
+    <td valign="top"> 
+      <div align="right"></div>
+    </td>
+    <td bgcolor="#cccccc" valign="top">&nbsp;</td>
+  </tr>
+  <tr bgcolor="#cccccc"> 
+    <td>stack<br>
+      frame<br>
+      for<br>
+      Fib(n) </td>
+    <td bgcolor="#cccccc" valign="top">&nbsp;</td>
+    <td bgcolor="#cccccc" valign="top">&nbsp;</td>
+  </tr>
+  <tr bgcolor="#cccccc"> 
+    <td>stack<br>
+      frame<br>
+      for<br>
+      main()</td>
+    <td bgcolor="#cccccc" valign="top"> 
+      <div align="right"></div>
+    </td>
+    <td bgcolor="#cccccc" valign="top">&nbsp;</td>
+  </tr>
+</table>
+<p>This tutorial will be easy to do, but hard to understand. Make sure you can 
+  follow what happens in this example, at the register level, before you move 
+  on! </p>
+<p>This tutorial introduces the <b>stack frame</b>. Typically, each function creates 
+  its own stack frame, where it saves local variables and other crucial data. 
+  As functions are called and return, the stack grows and shrinks one frame at 
+  a time. The stack frame for the Fib() function is illustrated in the table on 
+  your right. Recall from previous tutorials that the program counter 
+  (<span class="register">pc</span>) is 
+  in register 
+  <b><span class="register">r15</span></b>. By convention, ARM programs also maintain a stack pointer 
+  (<span class="register">sp</span>) in 
+  <b><span class="register">r13</span></b>, a link register 
+  (<span class="register">lr</span>) in 
+  <b><span class="register">r14</span></b>, and a frame pointer
+  (<span class="register">fp</span>) in 
+  <b><span class="register">r11</span></b>. 
+  Register allocations are described in more detail in the 
+  <a href="../intro.html#ref" target="intro">Procedure Call Standard for the ARM Architecture</a>
+<p>Within Fib(), the parameter <span class="sourcecode">i</span> 
+  and each local variable 
+  <span class="sourcecode">j</span> 
+  and <span class="sourcecode">k</span> has a unique place in the stack frame, expressible as a fixed 
+  offset from the frame pointer. The function moves these variables from their 
+  locations into arbitrary registers, but they always return to their places on 
+  the stack during function calls. This process can be inefficient, but it allows 
+  an indefinite number of nested function calls to take place.</p>
+<p>In Fib() the top of the stack 
+   (the value of <span class="register">sp</span>),
+   is one word above the location
+   of <span class="sourcecode">k</span>, the last variable. In more complex functions, the stack
+   grows 
+  &quot;up&quot; 
+  (<span class="register">sp</span> decreases numerically) from that location as values are
+  pushed  onto the stack.</p>
+<p>The program for this tutorial is an equivalent implementation of the Fibonacci
+  program from 
+  <script>writeNamedTutorial('handler1')</script>, 
+  and was created with the commands:</p>
+<pre class="hungindent">...t6]$ gcc -o t6.s -S ../t0/t0.c
+...t6]$ gcc -o t6m.s -S ../t0/t0m.cpp</pre>
+<p>As we examine this tutorial, we will  refer back to the original
+  C++ program, comparing 
+  <a href="t6.s" target="t6">t6.s</a> with 
+  <a href="../t0/t0.c" target="t0">../t0/t0.c</a> 
+  and <a href="t6m.s" target="t6m">t6m.s</a> with 
+  <a href="../t0/t0m.cpp" target="t0m">../t0/t0m.cpp</a>.
+  Without attempting to understand the entire main program, we can nevertheless
+  skim for some useful details from
+  <a href="t6m.s" target="t6m">t6m.s</a>:</p>
+<div class="hangingindent"> 
+<p>20-38: All the literal strings in the main program are collected here by the
+   compiler and given consecutive LC### labels. The <span class="sourcecode">.section</span> compiler directive
+   allows the linker to move this data to another part of the address space,
+  away  from the executable code. </p>
+<p>177-191: All the references to strings and other object are collected here.
+  For example, the reference to cin in the C++ program maps to ._ZSt3cin
+  on line 188.</p>
+<p>57, 61, 65, ...: All the input and output operations, &lt;&lt; and &gt;&gt;,
+   are translated by the compiler into calls to the matching &lt;iostream&gt; library
+    function. For example, the <span class="sourcecode"><span class="sourcecode">cout &lt;&lt; ...</span></span> statement
+    from lines 22-25 of <b>t0m.cpp</b>  become  calls to <span class="sourcecode">_ZStls...PKc</span> and
+    <span class="sourcecode">_ZNSolsEPFRSoS_E</span>. Note that practically all
+    the main program consists of calls to &lt;iostream&gt; 
+  functions--one reason we have avoided this code until now.</p>
+<p>84-88: These lines place the variable 
+  <span class="sourcecode">n</span> into register
+  <span class="register">r0</span>, call
+  Fib(), and move the return value from 
+  <span class="register">r0</span> into the variable 
+  <span class="sourcecode">f</span>.
+  (Why the transfer to 
+  <span class="register">r3</span>? Compilation habit, we suppose!)</p>
+</div>
+<p>After this brief tour of the main program, let's turn our attention to the 
+  function. Some notes on
+  <a href="t6.s" target="t6">t6.s</a> are: </p>
+<div class="hangingindent">
+  <p>22-24: The crucial registers are all adjusted to the new stack frame. The
+    <span class="sourcecode">stmfd</span> instruction, described in the 
+    <a href="../intro.html#ref" target="intro">ARM Developer Suite Assembler Guide</a>,
+       pushes registers 
+       <strong><span class="register">r11</span>/strong> and 
+       <strong><span class="register">lr</span></strong> onto
+       the stack in one instruction, adjusting 
+       <span class="register">sp</span> to point to
+       the top of the new stack. The 
+       <span class="sourcecode">add</span> instruction
+       points 
+       <span class="register">r11</span> to
+       the bottom of the new stack frame. the sub instruction raises the top
+       of the stack four places, to hold  the local variables (and one extra,
+       probably  padding).</p>
+<p>25-30: The compiler copies parameter 
+  <span class="sourcecode">i</span> from
+  <span class="register">r0</span> to its place
+  on the stack, then copies it right back into 
+  <span class="register">r3</span>. The C++ test 
+  &quot;if (i &lt; 2)&quot; 
+  on line 10 of
+  <a href="../t0/t0m.cpp" target="t0m">t0m.cpp</a> is reversed in translation, to a forward
+   branch when i &gt; 1. In the degenerate case, (Fib(1) or Fib(0)),  1 is stored
+   in <span class="register">r3</span>. and we branch to the return code at label .L3.</p>
+<p>32-36: These lines implement the statement &quot;<span class="sourcecode">j
+    = Fib(i-1);</span>&quot; on line
+  14 of
+  <a href="../t0/t0.c" target="t0">t0.c</a>. 
+  We see i copied out of the stack frame, decremented, and
+   placed in <span class="register">r0</span>. 
+   After the recursive call, the result is moved to 
+   <span class="register">r3</span>, then copied
+   into the stack frame.</p>
+<p>37-41: Similarly, compare these lines to the statement &quot;<span class="sourcecode">k
+    = Fib(i-2);</span>&quot; 
+  on line 15 of 
+  <a href="../t0/t0.c" target="t0">t0.c</a>.</p>
+<p>42-44: Compare to &quot;<span class="sourcecode">return
+  j + k;</span>&quot; on line 16 of 
+  <a href="../t0/t0.c" target="t0">t0.c</a>. 
+</p>
+<p>46: No matter how we reached line 46, the Fibonacci number is in register
+  <span class="register">r3</span>, so we copy it to 
+  <span class="register">r0</span> as our return value.</p>
+<p>47-48: These instructions are symmetrical to the stack building instructions
+  in lines 22-23, with a slight twist. The <span class="sourcecode">sub</span> instruction
+  restores the stack pointer to the value it had after the stmfd instruction
+  in line 22. The <span class="sourcecode">ldmfd</span> instruction
+  then does three things at the same time: it restores 
+  <strong><span class="register">r11</span>/strong> from
+  its place in the stack, loads the return address (stored from 
+  <strong><span class="register">lr</span></strong>)
+  into the 
+  <strong><span class="register">pc</span></strong>, and increments 
+  <strong><span class="register">sp</span></strong> back to the
+  old top of the stack. After this instruction, the processor is executing at
+  the same location, with the same stack frame, that it had before Fib was called.</p>
+</div>
+<p> Make and run this program, and verify that it indeed computes Fibonacci numbers,
+  just as the C++ program did in 
+  <script>writeNamedTutorial('fib1')</script>; 
+  then use gdb to trace its execution.
+  Excerpts from a gdb session are shown below. When you run this program, the
+  numbers will be similar though not identical. (Because memory is never empty,
+  it is normal to find values in memory that were not written by your program.
+  These values are <span class="ignore">highlighted in gray</span> in the examples
+  that follow:
+<pre class="hungindent">... t6]$ <span class="userTyped">gdb t6</span>
+Reading symbols from ...t6...done.
+(gdb) break Fib
+Breakpoint 1 at 0x8914
+(gdb) <span class="userTyped">run</span>
+...
+n> <span class="userTyped">3</span>
+
+Breakpoint 1, 0x00008914 in Fib ()
+8: x/24xw $sp
+0xbefffb88: <span class="ignore">0xbefffb94 0x00008bec</span> ...
+...
+8: /d $r0  = 3
+...
+4: /x $fp  = 0xbefffb88
+3: /x $lr  = 0x8a00
+2: x/i $pc
+=> 0x8914 <Fib>:        push    {r11, lr}
+1: /x $cpsr = 0x10
+(gdb) </pre>
+
+<p>The details of the stack frame for main() are best ignored. For now, 
+  note the top of the stack: in the example above it's the <span class="sourcecode">0xbefffb94</span> value
+  at location <span class="sourcecode">0x...b88</span>. As items are pushed and
+  popped on the stack, you will see this same hex pattern appear to move around
+  in the display; use it as a landmark for the initial top of stack.
+<p>The compiler, assembler and debugger appear to have been written by different
+  authors at different times. Compare the instruction at  <span class="sourcecode">0x8914</span> with
+  line 22 of 
+  <a href="t6.s" target="t6">t6.s</a>: you'll see that gdb
+  has translated  
+  <span class="sourcecode">stmfd sp!, {fp, lr}</span> to   
+  <span class="sourcecode">push {r11, lr}</span>. 
+ Also, take care to refer to the frame pointer as <span class="register">r11</span> when
+ you use gdb; the assembler and debugger appear to recognize a different registers
+ as 
+ <span class="register">lr</span>.
+<p>Use the <span class="userTyped">si</span> instruction to step forward. As instructions in lines
+  22-25 of 
+  <a href="t6.s" target="t6">t6.s</a> execute, the stack frame
+  for fib(3) is built and the variable <span class="sourcecode">i</span> is stored in it's slot. When execution
+  reaches the <span class="sourcecode">ldr</span> instruction,
+  the debugger display should look similar to this:
+<pre class="hungindent">...
+(gdb) <span class="userTyped">si</span>
+0x00008924 in Fib ()
+9: x/24xw $sp
+0xbefffb70: <span class="ignore">0x00000002</span>  0x00000003  <span class="ignore">0x00000008  0xbefffb94</span>
+0xbefffb80: 0xbefffbb4  0x00008a00  <span class="ignore">0xbefffb94  0x00008bec</span>
+...
+8: /d $r0 = 3
+...
+4: /x $fp = 0xbefffb84
+3: /x $lr = 0x8a00
+2: x/i $pc
+=> 0x8924 &lt;Fib+16>:     ldr     r3, [r11, #-16]
+1: /x $cpsr = 0x10
+(gdb) </pre>
+<p>Note that the stack has moved up 24 bytes, decreasing in the example from
+  <span class="sourcecode">0x...b88</span> to <span class="sourcecode">0x...b70</span>.
+  The frame pointer now points one location above the old top of stack. it's
+  old value as well as the value in the link register are saved at the bottom
+  of the stack frame. The current value of 
+  <span class="sourcecode">i</span> is stored at 
+  <span class="sourcecode">[lr, #-16]</span> .
+<p>Either step or continue until Fib() is reached again, then step  through
+   lines
+  22-25 of 
+  <a href="t6.s" target="t6">t6.s</a> again. The 
+   debugger  should display the stack frame for Fib(2), similar to
+  this:
+<pre class="hungindent">...
+(gdb) <span class="userTyped">si</span>
+0x00008924 in Fib ()
+9: x/24xw $sp
+0xbefffb58: <span class="ignore">0x00000000</span>  0x00000002  <span class="ignore">0x000087e0  0x00000000</span>
+0xbefffb68: 0xbefffb84  0x00008948  <span class="ignore">0x00000002</span>  0x00000003
+0xbefffb78: <span class="ignore">0x00000008  0xbefffb94</span>  0xbefffbb4  0x00008a00
+0xbefffb88: <span class="ignore">0xbefffb94  0x00008bec</span>  ...
+...
+8: /d $r0 = 2
+...
+4: /x $r11 = 0xbefffb6c
+3: /x $r14 = 0x8948
+2: x/i $pc
+=> 0x8924 &lt;Fib+16>:     ldr     r3, [r11, #-16]
+1: /x $cpsr = 0x20000010
+(gdb) </pre>
+<p>Note that the 
+  <span class="sourcecode">3</span> is still there, 24 bytes below the 
+  <span class="sourcecode">2</span> on the stack.
+   Either step or continue until Fib() is reached again, then step  through
+   lines
+  22-25 of 
+  <a href="t6.s" target="t6">t6.s</a> again. The  debugger
+   should display the stack frame for Fib(1). Viewing
+  the stack, you can find the argument values 
+  <span class="sourcecode">0x...1</span>, 
+  <span class="sourcecode">0x...2</span>,
+  and 
+  <span class="sourcecode">0x...3</span>, each separated by 24
+  bytes. You can also trace the frame pointers, threaded down the stack.
+<p>Since <span class="sourcecode">i</span> is equal to 1, the branch at line 28 is skipped. Execution therefore
+   proceeds through lines 29 and 30, then skips to line 46. Watch the display
+  carefully  as lines 47 and 48 execute. The <span class="sourcecode">sub</span> instruction drops  the stack
+  16 bytes, and the value <span class="sourcecode">1</span> disappears from the stack display. The <span class="sourcecode">ldmfd</span>
+  instruction, labelled <span class="sourcecode">pop</span> by the disassembler,
+  does three things at once:  
+  <span class="register">lr</span> is read from 
+  <span class="sourcecode">[sp]</span> (though
+  this time, its value does not change),  
+  <span class="register">pc</span> is
+  read from 
+  <span class="sourcecode">[sp, #4]</span>, and 
+  <span class="register">sp</span> increases by 8. Fib(1) has returned the value 1
+  in 
+  <span class="register">r0</span>.
+<p>Resuming the execution of Fib(2), the program stores the return value (j =
+  1) onto the stack at <span class="sourcecode">[fp, #-8]</span>. It then retrieves the current argument (i =
+  2) from stack, subtracts 2 and calls Fib(0). While many of the register movements
+  are unnecessary, the use of the stack to hold i and j is essential.</p>
+<p>Stepping quickly through the next instructions, you can follow the execution
+   of Fib(0), which builds a stack frame on the same addresses used earlier by
+  Fib(1). Fib(0) returns 1, which is stored on the stack (unnecessarily),
+  then added to the 1 returned by Fib(1) and retrieved from the stack (necessarily).
+  Fib(2) adds the intermediate results and returns 2 in 
+  <span class="register">r0</span>. Fib(3) resumes
+  . . . when you are sure you can predict the movements into and out of registers,
+    and onto and off of the stack, use the gdb command <span class="sourcecode">continue</span> to
+    resume execution. You can run the program with other arguments, or use the
+    gdb command <span class="sourcecode">quit</span> 
+  to exit.</p>
+<p><b>Self-Test</b></p>
+<ol>
+  <li> (8) Sketch the stack frames created when this program computes Fib(4).
+     Show the relative locations and values saved from registers 
+     <span class="register">r0..r3</span>, 
+     <span class="register">r11</span>, and
+     <span class="register">pc</span>.</li>
+  <li> (5) Annotate the assembly listing of 
+  <a href="t6.s" target="t6">t6.s</a>, by labelling each group 
+    of instructions with the C++ statements from 
+    <a href="../t0/t0.c" target="t0">t0.c</a> which are being 
+    carried out by the instructions.</li>
+  <li>(3) Note that this program saves a great deal of unnecessary information 
+    in the stack frame. Some data never changes; other values change, but the 
+    changed values are never reused. Mark the unnecessary instructions which could 
+    be deleted from this program, and explain why each deleted instruction is 
+    unnecessary.</li>
+  <li>(3) Suppose the stack segment has a size of 8 kilobytes (word addresses 
+    <span class="sourcecode">0xbffff000</span> to <span class="sourcecode">0xbfffffffc</span>). What's the largest Fibonacci number we can compute 
+    without running out of stack space?</li>
+</ol>
+<p><b>Assignment</b></p>
+<p> Disassemble the function you wrote for
+  <script>writeNamedTutorial('fib1')</script>, 
+  <b>t0s</b><i>x</i><b>.c</b>,
+    into the new file <b>t6s</b><i>x</i><b>.s</b>, using the same letter <i>x</i> 
+  that you used to submit your program in
+  <script>writeNamedTutorial('fib1')</script>
+  .
+  Likewise, disassemble
+  your main program from 
+  <b>t0s</b><i>x</i><b>m.cpp</b> into <b>t6s</b><i>x</i><b>m.s</b>, again
+   using  the same letter <em>x</em>. Make sure your disassembled function compiles,
+   links  with the main program, and runs identically to your C++ program. Debug
+   your  new program, and sketch the stack frames that are created as it runs.
+ Submit  your files <b>t6s</b><i>x</i><b>.s</b> and <b>t6s</b><i>x</i><b>m.s</b> as
+ usual, along with an image of your sketch labelled <b>t6s</b><i>x</i><strong>.jpg</strong>, <b>t6s</b><i>x</i><strong>.gif</strong>,
+ or <b>t6s</b><i>x</i><strong>.png</strong> .</p>
+<script>writeFooter()</script>
+</body>
+</html>

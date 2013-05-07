@@ -1,0 +1,39 @@
+#!/bin/bash
+
+[ "$*" == "" ] && {
+	echo "usage $0 dir ..."
+	exit 1
+}
+
+for dir in $@
+do
+	find $dir -name '*~' -print -exec rm -rf {} \;
+# 	cd "$dir" || {
+# 		echo "cannot cd to $dir"
+# 		exit 1
+# 	}
+# 
+# 	echo "removing ~'s from `pwd`"
+# 
+# 	for f in *
+# 	do
+# 		g=`echo "$f" | sed s/~//`
+# 		[ "$g" == "$f" ] && continue;
+# 
+# 		[ -d "$f" ] && {
+# 			$0 "$f" || {
+# 				echo "recursion failed"
+# 				exit 1
+# 			}
+# 		}
+# 
+# 		[ -f "$g" ] && {
+# 			[ -d old ] || mkdir old || {
+# 				echo "cannot back up to old"
+# 				exit 1
+# 			}
+# 			mv "$g" old/
+# 		}
+# 		mv "$f" "$g"
+# 	done
+done

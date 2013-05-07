@@ -1,0 +1,209 @@
+<HTML>
+<HEAD>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<script>wTitle()</script>
+</HEAD>
+<body>
+<h1>t8: Exceptions 1</h1>
+<script>wNavbar()</script>
+<P>In this tutorial we will explore the exception handling capabilities provided
+  by the Linux operating system that runs on the 
+  <script>writeLongMachineName()</script>
+  . To experiment with the low-level
+  exception handling described in the text, you would need to debug the Linux
+  ARM kernel, or use a  simpler operating system. </P>
+<P>The Linux operating system has a relatively transparent mechanism for some
+  exceptions. In this example, the program will try to read memory that was not
+  allocated to it. As the text explains, this generates a &quot;Data Abort&quot; in the
+  ARM Processor. We cannot process this abort directly, but the Linux operating
+  system on the
+  <script>writeLongMachineName()</script>
+  will, if we allow, catch this exception and call the function
+  we designate, just as though a procedure call had occurred in the  executing
+  program. As we will see,
+  this facility gives us a great deal of flexibility in handling the exception.</P>
+<P>First, let's examine the program. This main program initializes  an array,
+  and naïvely allows us to examine values by entering an index. By failing to
+  check that the input is within the array bounds, the program allows us to trigger
+  memory exceptions. Here are a few notes on 
+  <a href="t8m.cpp" target="t8m">t8m.cpp</a>:</P>
+<P class="hangingindent">16: A Linux signal handler must be void, and must take
+  one argument, the value of the signal.</P>
+<P class="hangingindent">17: An array initialized with some prime numbers,
+  an arbitrary choice, so we have some memory to display.</P>
+<P class="hangingindent">18-19: These variables are shared by the main program
+  and the exception handler, as we'll see in 
+  <a href="t8.s" target="t8">t8.s</a>.</P>
+<P class="hangingindent">24-29: These instructions set up the program to call
+  the handler when the exception occurs. the name 
+  <span class="sourcecode">sigaction</span>
+  denotes both a structure and a function; both are described in the 
+  <a href="../intro.html#ref" target="intro">Local man pages</a>. 
+  The particular exception chosen, in this case SIGSEGV,
+  is the one most often triggered
+  by an out-of-bounds array assignment. Other choices made here are:></P>
+<ul class="hungindent">
+  <li>Not to mask other exceptions while the handler runs.</li>
+  <li>Not to invoke any special behaviors.</li>
+</ul>
+<P>The handler is not complex, but some of its activity is a bit subtle. Here
+  are a few notes on 
+  <a href="t8.s" target="t8">t8.s</a>:</P>
+<P class="hangingindent">31: The linker replaces the symbol <span class="sourcecode">last_signal</span>
+  with the address of this variable
+  in main().</P>
+<P class="hangingindent">14-15: When  <span class="sourcecode">bouncer()</span> executes, <span class="register">r0</span> contains the
+  signal number. In this program, we expect that value to be SIGSEGV because
+  that's the only signal we are set up to handle, but in general this parameter
+  is useful to determine the exception we are handling. 
+  To copy this value where the main program can read it, we first load the address
+  of <span class="sourcecode">last_signal</span> into
+  <span class="register">r1</span>, then we use 
+  <span class="sourcecode">[r1]</span> as
+  a pointer to store <span class="register">r0</span>.</P>
+<P class="hangingindent">17-19: Since <span class="sourcecode">last_signal</span> and <span class="sourcecode">count</span> are
+  declared contiguously in memory, [r1, #4] points to count. We use that address
+  to load the count, increment it, and store the new value. WARNING: this code
+  is brittle, and will break if the declarations in
+  <a href="t8m.cpp" target="t8m">t8m.cpp</a> are moved!</P>
+<P class="hangingindent">21-23: As is stated in the text, the exception hardware
+  for a data abort pushes the address of the instruction that caused the exception
+  onto the stack, so that the exception can be retried after the handler executes.
+  In our case, that would cause an infinite loop: because each time the handler
+  returned, the program would ty to fetch the same, non-existent array value.
+  The solution here is to fetch the 
+  <span class="register">pc</span> from the program stack, increment it to
+  point to the next instruction, and save it back. The program will &quot;return&quot; from
+  the interrupt to the next instruction, and proceed to print the new value...</P>
+<P class="hangingindent">25-26: ...except that, in place of the non-existent
+  array value, we wish A[i] to return -1.  Linux has helped us out by
+  saving the register values on the stack along with the 
+  <span class="register">pc</span>. By writing new values
+  onto the stack, we can change the registers when the program resumes.</P>
+<p>Make and run this program, and verify that <span class="sourcecode">A[2]=5</span>, <span class="sourcecode">A[7]=23</span>,
+  etc. Then, try large, invalid indices; A[2000], for example, should report
+  -1, thanks to the signal handler. The program should be able to handle a mix
+  of valid and invalid indices, reporting correct values for indices in the array,
+  random values for indices slightly out of bounds, and -1 for indices that cause
+  segment faults. If you're not sure what all the signal-handling
+  fuss is about, comment out line 30 in t8m.cpp, re-make the program and try
+  fetching A[2000] without the handler in place.</p>
+<p>Use gdb to trace the operation of the program. Set a break point at bouncer,
+  run the program, and enter <span class="userTyped">2</span> as
+  the first index. the program should
+  report
+  <span class="sourcecode">A[2]=5</span> without stopping at the handler. Enter
+  <span class="userTyped">2000</span>, however, and the program will
+  respond similar to this:</p>
+<pre>
+Program received signal SIGSEGV, Segmentation fault.
+0x00008a48 in main () at t8m.cpp:38
+38        v = A[i];
+0xbefffa88: <span class="ignore">0x00008970</span> ...
+...
+(gdb) </pre>
+<p>In this case, GDB has caught the exception before our handler.  Enter <span class="userTyped">si</span>,
+and we find ourselves in the exception handler:</p>
+<pre>
+Breakpoint 1, 0x00008970 in bouncer ()
+11: x/32xw $sp
+0xbefff798: <span class="ignore">0x5ac3c35a 0x7c96f087 0xbefff85c 0xb6fe1d84</span>
+0xbefff7a8: <span class="ignore">0xbefff800 0x0000000e 0x00000017 0x00000000</span><br>0xbefff7b8: <span class="ignore">0x000111a8 0xbefff9d8 </span>0x000007d0 0x00011170<br>0xbefff7c8: <span class="ignore">0x00011230 0x00000000 0x0000883c 0x00000000</span><br>0xbefff7d8: <span class="ignore">0x00000000 0x00000000 0xb6ffefb4 0xbefffbb4</span><br>0xbefff7e8: <span class="ignore">0x00011128 0xbefffa88 0x00008b74</span> 0x00008a48
+...
+8: /x $r2 = 0x7d0
+7: /x $r3 = 0x11170<br>...
+(gdb)</pre>
+<p>Not only has control moved from main() to bouncer(); the stack has jumped
+  188 words, from <span class="sourcecode">0x...a88</span> to <span class="sourcecode">0x...798</span>.
+  Among the many, many things pushed onto the stack are the values of all 16
+  registers, <span class="register">r0..r15</span>,
+  at addresses <span class="sourcecode">0xbefff7b8..f4</span>. When execution
+  returns from bounce(), these values will all be popped off the stack and stored
+  into the registers, to restore the processor to its precise state at the point
+  the exception occurred. </p>
+<p>We can use the values on the stack to figure out exactly which instruction
+  created the exception, and the values of its operands. From the stack dump,
+  as from the earlier segment fault, we see that the program counter was at location <span class="sourcecode">0x00008a48</span> when
+  the fault occurred. We can see the faulting instructions by disassembling the
+  program around the return address:</p>
+<pre>
+(gdb) <span class="userTyped">disass 0x8a44,0x8a50</span>
+Dump of assembler code from 0x8a44 to 0x8a50:
+   0x00008a44 &lt;main()+164&gt;: ldr r3, [pc, #376]<br>   0x00008a48 &lt;main()+168>: ldr r3, [r3, r2, lsl #2]
+   0x00008a4c &lt;main()+172>: str r3, [r11, #-16]
+End of assembler dump.
+(gdb) </pre>
+<p>From these instructions it appears the <span class="register">r3</span> contains the pointer to A[], and
+  <span class="register">r2</span> contains the index. Indeed, we see that 
+  <span class="sourcecode">r2=0x7d0=2000</span>,
+  value of the index. We also see that the instruction failed when
+  it tried to load a new value into <span class="register">r3</span>, and that
+  the effective address <span class="sourcecode">[r3, r2, lsl #2]</span> is equivalent
+  to <span class="sourcecode">A[i]</span>. (The <span class="sourcecode">lsl
+  #2</span> operation multiplies the
+  index by 4, because each integer takes 4 memory locations.)</p>
+<p>Step through the next 5 instructions (lines 7-11 of 
+  <a href="t8.s" target="t8">t8.s</a>), which update the
+  global variables <span class="sourcecode">last_signal</span> and <span class="sourcecode">count</span>.
+  The method used here is similar to
+  that used in previous tutorials, except for the pointer arithmetic used to
+  access <span class="sourcecode">count</span>.</p>
+<p>The next 3 instructions are more subtle. We
+  see that the program counter has been saved on the stack at location <span class="sourcecode">0xbefff74</span>. We
+  want
+  to move this pointer
+  past the instruction that raised the exception, to prevent it from raising
+  this exception all over again. The <span class="sourcecode">ldr</span> instruction
+  copies the pointer, <span class="sourcecode">0x8a48</span>,
+  into <span class="register">r3</span>; the <span class="sourcecode">add</span> increments
+  it to <span class="sourcecode">0x8a4c</span>;
+  and the <span class="sourcecode">str</span> saves it back on the
+  stack. When
+  the handler completes, the program counter is restored from the stack,
+  but execution will resume one instruction later.</p>
+<p>Similarly, the next two instructions change the result of <span class="sourcecode">A[i]</span>. The
+  destination of the
+  <span class="sourcecode">ldr</span> instruction at 
+  <span class="sourcecode">0x8a48</span>  is 
+  <span class="register">r3</span>,
+  which is saved on the stack at location <span class="sourcecode">0xbefff7c4</span>. By
+  storing
+  <span class="sourcecode">-1</span> in this location, the handler changes the
+  value returned by the reference to <span class="sourcecode">A[i]</span>. If
+  we continue at the <span class="sourcecode">mov pc, lr</span> instruction,
+  the program reports that &quot;<span class="sourcecode">A[2000]
+  = -1</span>&quot;, none the wiser for the handler's manipulations.</p>
+<p><b>Assignments</b></p>
+<ol class="assignment">
+  <li> Write a main program with an apparently infinite loop, and a handler for
+    SIGINT. Linux sends SIGINT whenever an impatient user types CTRL-C. The
+    handler must  change the loop condition, and the main program must exit the
+    loop and print a message to indicate that the signal was received.
+    Run the program and type CTRL-C to ensure that your program exits cleanly.</li>
+  <li> Write a main program with an apparently infinite loop, and a handler for
+    SIGQUIT. Linux sends SIGQUIT whenever an impatient user types CTRL-\. The
+    handler must change the loop condition, and the main program must exit the
+    loop and print a message to indicate that the signal was received. Run the
+    program and type CTRL-\ to ensure that your program exits cleanly.</li>
+  <li>Write a main program with an apparently infinite loop, and a handler for
+    SIGALRM. The main program will set up the handler and use the alarm() system
+    call to schedule a (~5 second) alarm before it enters the loop. Use your
+    handler to change the loop condition, and include a message in the main program
+    to indicate that the loop exits normally. Run the program and wait for the
+    timer to expire, to ensure that your program exits cleanly.</li>
+  <li> Write a main program with an apparently infinite loop, and a handler for
+    SIGTERM. The
+    handler must change the loop condition, and the main program must exit the
+  loop and print a message to indicate that the signal was received. Test your
+  handler by opening a second terminal window and typing the command:
+  <pre>
+... t8]$ killall t8sd
+... t8]$</pre>
+When you switch back to the first terminal window, the message should be printed.
+</li>
+</ol>
+<script>writeFooter()</script>
+</BODY>
+</HTML>

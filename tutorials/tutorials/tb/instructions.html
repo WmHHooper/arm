@@ -1,0 +1,84 @@
+<HTML>
+<HEAD>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<script>wTitle()</script>
+</HEAD>
+<body>
+<h1>tb: Floating Point Exceptions</h1>
+<script>wNavbar()</script>
+<P>The VFP11 coprocessor in the
+<script>writeLongMachineName()</script>
+is an implementation of the ARM Vector
+Floating-point Architecture (VFPv2). This processor contains its own status registers
+and its own hardware to handle floating point exceptions. Because floating point
+operations are executed by a co-processor rather than the ARM core, their exceptions
+require coordination between the two logical pieces of hardware. For our purposes,
+the co-processor register of interest is the Foating-Point
+Status and Control Register (FPSCR). The FPSCR bit fields are
+  described in the 
+  <a href="../intro.html#ref" target="intro">ARM1176JZF-S™ Technical Reference Manual</a>. </P>
+<P>This program uses a simple computation to illustrate the
+   handling of floating point exceptions. First, we examine 
+   <a href="tbm.cpp" target="tbm">tbm.cpp</a>:</P>
+<P class="hangingindent">17: as in 
+  <script>writeNamedTutorial('handler1')</script>, 
+  the exception handler takes
+  one integer argument and returns a void result.</P>
+<P class="hangingindent">18-20: these variables are shared with the handler,
+  again as in 
+  <script>writeNamedTutorial('handler1')</script>. 
+  The new variable, new_cw, will hold a copy of the
+  FPSCR.</P>
+<P class="hangingindent">26-28, 42: these instructions notify the floating point
+  co-processor to raise SIGFPE when it encounters Division by Zero and Invalid
+  Operation exceptions. Without these instructions, floating point exceptions
+  may be handled by the co-processor without any intervention from the core processor. Details
+  of the <span class="sourcecode">_FPU_SETCW()</span> instruction are poorly documented, but you can read definitions
+  of the constants and macros from the 
+  <script>writeLongMachineName()</script>
+  itself, with the command:</P>
+<pre>... tb]$ <span class="userTyped">cat /usr/include/fpu_control.h</span> </pre>
+<P class="hangingindent">30-34: these instructions, similar to those in 
+  <script>writeNamedTutorial('handler1')</script>, 
+  notify the ARM core processor to send floating point exceptions to our handler.</P>
+<P>Next we observe 
+  <a href="tb.s" target="tb">tb.s</a>:</P>
+<P class="hangingindent">	15-16: store the signal in the shared variable last_signal.</P>
+<P class="hangingindent">18-20: increment the counter.</P>
+<P class="hangingindent">22-23: copy the FPSCR into the new_cw.</P>
+<P>Compile and run tb, and enter <span class="userTyped">4 1</span> at the &gt; prompt. The program does the arithmetic
+  without exception and reports <span class="sourcecode">sqrt(4/1) = 2</span>. Enter -4 1, thought, and the
+  result is similar to this:</P>
+<pre>sqrt(-4/1) = nan<br>status: 8 (Exec format error)<br>count: 1<br>cw: 0x80000301</pre>
+<P>The special IEEE 754 quantity NaN was placed in 
+  <span class="register">s0</span> by the co-processor, which
+  also raised signal 8. A control word of 0x80000301shows
+  that:</P>
+<p class="hangingindent"><strong>bit 31</strong>: the result
+  of the operation was negative.</p>
+<p class="hangingindent"><strong>bits 9-8</strong>: that the _FPU_MASK_ZM  and
+  _FPU_MASK_IM bits were set, trapping Division by Zero and Invalid Operations,
+  respectively.</p>
+<p class="hangingindent"><strong>bit 0</strong>: that an invalid operation has, in fact, occurred.</p>
+<P>Continue, entering a mixture of valid and invalid operands. Entering <span class="userTyped">3
+    0</span>, for example,
+  returns the special value INF and produces a control word of 0x302, indicating
+the Division by Zero exception.</P>
+<p><b>Assignments</b></p>
+<ol class="assignment">
+  <li>Revise the program and its handler, to print &quot;Division by Zero&quot; when
+    this exception is handled.</li>
+  <li>Revise the program and its handler, to print &quot;Invalid Operation&quot; when
+    this exception is handled.</li>
+  <li>Write a handler  for overflow, and a main program to perform simple
+    arithmetic that can, optionally, generate overflow.</li>
+  <li>Write a handler for underflow, and a main program to perform simple
+  arithmetic that can, optionally, generate underflow.</li>
+  <li>Write a handler for the inexact exception, and a main program to perform
+    simple arithmetic that can, optionally, generate  the inexact exception.</li>
+</ol>
+<script>writeFooter()</script>
+</BODY>
+</HTML>

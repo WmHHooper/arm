@@ -1,0 +1,59 @@
+<HTML>
+<HEAD>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<script>wTitle()</script>
+</HEAD>
+<body>
+<h1>td: Vector Operations</h1>
+<script>wNavbar()</script>
+<P>The ARM processor in the 
+  <script>writeLongMachineName()</script> 
+  is capable of vector operations which are only accessible in assembly or through
+  intrinsic functions in the  compiler.  Vector load/store,  arithmetic,
+  and multiply-accumulate operations have been added to the ARM core instruction
+  set over the years.  As the power and scope of these operations have increased,
+  the assembly syntax  has evolved into more general forms. The syntax for vector
+  operations is documented in the 
+  <a href="../intro.html#ref" target="intro">ARM Architecture Reference Manual</a>.</P>
+<P>To illustrate the operations, we revisit the dot product function from 
+  <script>writeNamedTutorial('dotprod2')</script>. 
+  As we did there, we start with copies. In this case, we copy
+  ../t9/t9m.cpp
+  into tdm.cpp,
+  and ../tc/tcv3.s into tdv3.s . We then rewrite a faster version of dotProd
+  in <a href="tdv4.s">tdv4.s</a>:</P>
+<P class="hangingindent">21-22: We use vector load instructions to load four registers at a time. The
+  <span class="sourcecode">!</span> addressing mode causes the index register to update after the
+  load is complete.</P>
+<P class="hangingindent">24-27: The fmla instruction multiplies and adds in one continuous pipeline.
+  The effect of the first instruction is, for example:</P>
+<p class="hungindent"><span class="sourcecode">d0 = d0 + (d4 * d8)</span></p>
+<P class="hungindent">Multiply-accumulate instructions are common
+  in many
+  floating point units, because so many formulae involve addition and multiplication. </P>
+<P>Make and run <span class="sourcecode">tdv3</span> and <span class="sourcecode">tdv4</span>,
+  comparing their performance on the vector input file. You should see another
+  9-11% speedup of the new dotProd function.</P>
+<P><b>Self-Test</b></P>
+<div class="hangingindent"> 
+  <P>1.&#9;(1) What is the restriction on N, implied by the fourth version of
+    DotProd? Explain.</P>
+  <P> 2.&#9;(4) The ARM Vector Floating Point (VFP) specification  includes vector
+    arithmetic operations. These provide, for example, the pairwise multiplication
+    of multiple operands from one vector with those of another. Describe the
+    changes you would need to make in DotProd to take advantage of these operations.</P>
+</div>
+<P><b>Assignments</b></P>
+<P>Take the function you wrote for 
+  <script>writeNamedTutorial('dotprod2')</script>,
+  replace the individual load/store
+  instructions with integer counterparts, and generally consolidate the operations
+  into fewer and more powerful instructions. Test your function with data of
+  sufficient length that you can measure the difference in performance. Submit <b>tds</b><u><em>x</em></u><b>v4.s</b>, <b>tds</b><u><em>x</em></u><b>m.cpp</b> (which
+  may be a copy of <b>t9s</b><u><em>x</em></u><b>m.cpp</b>), and a log file <b>tds</b><u><em>x</em></u><b>v4.log</b> that
+  shows a performance comparison on a long data sample. </P>
+<script>writeFooter()</script>
+</BODY>
+</HTML>

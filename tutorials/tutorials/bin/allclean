@@ -1,0 +1,14 @@
+#!/bin/sh
+for t in t?
+do 
+  echo -n $t:
+  (
+	  cd $t
+	  [ -f makefile ] || {
+	    echo
+	    continue
+	  }
+	  make clean
+	)
+done
+rm -rf .AppleDouble/ */.AppleDouble

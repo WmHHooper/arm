@@ -1,0 +1,90 @@
+<HTML>
+<HEAD>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<script>wTitle()</script>
+</HEAD>
+<body>
+<h1>tc: Pipelines and Optimization</h1>
+<script>wNavbar()</script>
+<P>Like all modern processors, the ARM family is designed to execute instructions
+   in parallel, beginning a new instruction before previous instructions have
+  completed.  This behavior does not affect the correctness of a typical (timing
+  independent)  program, but it has a significant effect on the program&#146;s
+  performance. Pipeline strategies vary from chip to chip in the ARM family,
+  but several optimization techniques are common to all of them.</P>
+<P>This tutorial uses the same main program as in 
+   <script>writeNamedTutorial('dotprod1')</script>, applying successive optimizations to improve performance. In particular:
+   <a href="tcm.cpp" target="tcm">tcm.cpp</a> is identical to 
+   <a href="../t9/t9m.cpp" target="t9m">t9m.cpp</a>, 
+   <a href="tcv0.c" target="tcv0">tcv0.c</a> is identical to 
+   <a href="../t9/t9v0.c" target="t9v0">t9v0.c</a>, and 
+   <a href="tcv1.s" target="tcv1">tcv1.s</a> is identical to 
+   <a href="../t9/t9v1.s" target="t9v1">t9v1.s</a>. The new files are 
+   <a href="tcv2.s" target="tcv2">tcv2.s</a> and 
+   <a href="tcv3.s" target="tcv3">tcv3.s</a>. First,
+   let's review 
+   <a href="tcv2.s" target="tcv2">tcv2.s</a>, a simple modification
+   of version 1:</P>
+<p class="hangingindent">26-32: These lines are simply  duplicate  lines 19-25. This
+  process of  <em>unrolling the loop</em> reduces the number of branch penalties we
+  suffer as the program executes.</p>
+<P>There are a few more modifications in 
+  <a href="tcv3.s" target="tcv3">tcv3.s</a>:</P>
+<P class="hangingindent">19-22: All the load operations are done sequentially,
+  to keep the ARM pipeline stages operating in lockstep. Consecutive memory locations
+  are loaded in sequence, to improve the cache hit ratio.</P>
+<P class="hangingindent">23-25: We move the integer operations here,  allowing
+  the floating point operands time to load before they are used.</P>
+<P class="hangingindent">26-29: We use additional registers  to reduce the
+  number of data dependencies.</P>
+<P>Make  tcv0, tcv1, tcv2, and tcv3, and run each program on the same
+  vectors to ensure that all versions compute the correct dot product. The performance
+  difference between versions will be negligible, and in fact may favor the first
+  version you run.</P>
+<P>A more significant test of performance requires  longer vectors. The files
+  <a href="v10.txt" target="v10">v10.txt</a> ... <a href="v10000.txt" target="v10000">v10000.txt</a> define
+  progressively longer vectors filled with random numbers. (These files were,
+  in turn, created by the spreadsheet <a href="vectors.xlsx" target="vectors">vectors.xlsx</a>.)
+  Test each version by redirecting input from the same test file; the output
+  roughly compares the performance of each
+  version:</P>
+<pre>
+... tc]$ <span class="userTyped">./tcv0 &lt; v10000.txt</span>
+-29.956666 computed by tcv0 in 0.001591 seconds.
+... tc]$ <span class="userTyped">./tcv1 &lt; v10000.txt</span>
+-29.956666 computed by tcv1 in 0.001090 seconds.
+... tc]$ <span class="userTyped">./tcv2 &lt; v10000.txt</span>
+-29.956666 computed by tcv2 in 0.001116 seconds.
+... tc]$ <span class="userTyped">./tcv3 &lt; v10000.txt</span>
+-29.956666 computed by tcv3 in 0.000975 seconds.</pre>
+<P>Notice that simply unrolling the loop (<span class="sourcecode">tcv2</span>)
+  does not improve performance on this processor, but
+  it makes possible
+  the memory manipulations that do.</P>
+<P><b>Self-Test</b></P>
+<div class="hangingindent"> 
+  <P>1.&#9;(1) What can go wrong with versions 2 and 3, if N is an odd number?</P>
+  <P> 2.&#9;(1) How can you rearrange the instructions in version 3 to improve
+    performance, which still using the same instructions and computing the correct
+  answer? Explain your changes.</P>
+  <P> 3.&#9;(2) How can you rearrange the instructions in version 3, to show
+    the <em>worst</em> possible
+    performance, which still using the same instructions and computing the correct
+    answer? Explain your changes.</P>
+</div>
+<P><b>Assignments</b></P>
+<P>Take the function you wrote for 
+  <script>writeNamedTutorial('dotprod1')</script>, 
+  unroll the loop at least once
+  and arrange the instructions to reduce pipeline stalls. Test your function
+  with data
+  of sufficient length that you can measure the difference in performance. You
+  do not have to write a second version, <b>tcs</b><u><em>x</em></u><b>v2.s</b>,
+  which simply unrolls the loop, but you may find it helpful to do so. Submit <b>tcs</b><u><em>x</em></u><b>v3.s</b>, <b>tcs</b><u><em>x</em></u><b>m.cpp</b> (which
+  may be a copy of <b>t9s</b><u><em>x</em></u><b>m.cpp</b>), and a log file <b>tcs</b><u><em>x</em></u><b>v3.log</b> that
+  shows a performance comparison on a long data sample. </P>
+<script>writeFooter()</script>
+</BODY>
+</HTML>

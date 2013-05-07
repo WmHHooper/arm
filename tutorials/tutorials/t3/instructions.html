@@ -1,0 +1,183 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<script>wTitle()</script>
+</head>
+<body>
+<h1>t3: Addressing Modes, Part I</h1>
+<script>wNavbar()</script>
+<p>Arrays, reference parameters, and file access all rely on <i>indirect modes</i> 
+  of address at the machine language level. As described in sections 2.5 and 3.1.2 
+  of your text, the ARM processor has many indirect modes. This tutorial uses 
+  <i>register index mode </i>to manipulate an array of characters (i.e., a string). 
+  The file <a href="t3m.cpp" target="source">t3m.cpp</a> has one important detail:</p>
+<blockquote> 
+  <p> 11: In this declaration, "<b>char</b> s[]" is an <i>array</i> parameter
+     passed to the procedure NoCaps(). This is the first parameter passed by
+    reference,  and all other reference parameters will follow this pattern.</p>
+</blockquote>
+<p>Some notable features of 
+<a href="t3.s" target="t3">t3.s</a> are on the following lines:</p>
+<p class="hangingindent"> 15, 30: We have to copy the link register to a safe
+  place, because it may be overwritten by later subroutine calls.
+  When we reach the end of the string at line 30, copying
+<span class="register">r2</span> back into the program
+  counter will return execution to main().</p>
+<p class="hangingindent">16, 37: This is our first example of indexed addressing,
+  although it looks simpler than it appears. As
+  the
+  assembler translates this program into machine code,   it resolves the reference
+  to <span class="sourcecode">data</span> by
+  counting the number of bytes from the load instruction to the <span class="sourcecode">data:</span>
+  label and adjusts for prefetching. It rewrites the instruction as: 
+  <span class="sourcecode">ldr r3, [pc, #40]</span> .</p>
+<p class="hangingindent">17: Branch to the loop test. The safest and most efficient
+  way to write a loop is to place the primary loop test at the end, branching
+  backwards as long as the test condition is true. When the test fails, execution
+  simply falls out of the loop to the  instructions that follow. The body of
+  the loop is more efficient this way, but requires this branch to skip the loop
+  body the first time through.</p>
+<p class="hangingindent">25: This <span class="sourcecode">ldrb</span> instruction
+  is our second example  of indexed
+    addressing. Here, 
+   <span class="register">r0</span> 
+   points to a character from the string 
+   <span class="sourcecode">s</span>, specified in the
+    source code to main(). The instruction loads one byte from this address into
+   
+<span class="register">r1</span>. Since
+<span class="register">r0</span> is incremented inside the loop, this instruction fetches a new
+    element of the array each time it's executed.</p>
+<p class="hangingindent">26-27: Strings in C and C++ end with a <i>null character</i>,
+  a byte which  has the numerical value of zero. We are comparing
+<span class="register">r1</span> with zero
+  to test for the null character that marks the end of the string. When
+  the test fails, the branch is skipped and we fall to the return instruction.</p>
+<p class="hangingindent">20: If the character is already lowercase, we need to
+  skip the conversion  and test the next character.
+<span class="register">r3</span> contains the ASCII
+  character 'Z', so  any character less than or equal to
+<span class="register">r3</span> must be in uppercase.</p>
+<p class="hangingindent">21-22: Here we look at another form of branching, used
+  to implement subroutines. When the <span class="sourcecode">bl__</span> instruction
+  branches, it saves a copy of the program counter in a link register. Control
+  transfers to <span class="sourcecode">lower:</span> as in any other 
+    branch; but at the  <span class="sourcecode">move pc, lr</span>  instruction
+    control passes back to the address in the link register. The  
+    <span class="sourcecode">bl ... mov pc, lr</span>  instruction pair is used for
+  all subroutine calls and returns. Whether we take the branch or not, we must
+  increment
+<span class="register">r0</span> to point to the next character.</p>
+<p class="hangingindent">32-34: To understand this manipulation, it 
+  will help to review the ASCII table in Appendix E. All ASCII capital letters
+  differ from their lowercase equivalents by one bit in  position 5. ORing
+  them with the bit pattern 0x20 sets this fifth bit, converting them to lowercase.
+  For example:</p>
+<pre>
+     'E'       0100 0101
+ <u>or 0x20</u>    <u>or 0010 0000</u>
+     'e'       0110 0101</pre>
+<p class="hungindent">The converted character is stored back into the array,
+  at the same effective address <span class="sourcecode">[r0]</span> where
+  it was loaded. We then return to the loop, resuming execution at line 22.</p>
+<p>As usual, you should run this program and verify its operation. Be sure to
+  enter strings that include digits and punctuation. At the "&gt; " prompt, enter
+  a few capitalized words; the program will echo these back to you with all
+  the letters in lower case. Press <i><u>return</u></i> without
+  entering a string, and the program will quit.</p>
+<p>Before we use the debugger, it's time to take a look at A quick look at the <a href="gdb.ini" target="source">gdb.ini</a> file
+  will illustrate some useful debugging techniques. Note in particular the lines:</p>
+<pre>...
+display/s $r0
+display/16bx $r0
+display/x $r0</pre>
+<p>Because the array
+  is passed by reference, 
+  <span class="register">r0</span> contains a pointer to the characters in the string,
+  rather than the characters themselves. The command 
+  <span class="sourcecode">display/16xb $r0</span> displays
+  sixteen bytes in hexadecimal, beginning at the location in 
+  <span class="register">r0</span>. The command 
+  <span class="sourcecode">display/s $r0</span> displays
+     the same region of memory, but this time as a string. If you were debugging
+     an array of integers, a display option like 
+     <span class="sourcecode">/16xw</span>
+     would be more legible than 
+     <span class="sourcecode">/16xb</span>,
+     and <span class="sourcecode">/s</span>
+     would not be useful at all. More debugging options are described in the
+     <a href="../intro.html#ref" target="intro">Debugging with gdb</a>.</p>
+<p>Use gdb to debug t3. Set a breakpoint at NoCaps, then run the program and
+  enter  the string 
+  <span class="userTyped">Hi, U!</span>, the display will look
+  similar to the following:</p>
+<pre>
+9: /x $r0 = 0xbefffab0
+8: x/16xb $r0
+0xbefffab0: 0x48 0x69 0x2c 0x20 0x55 0x21 0x00 0x00
+0xbefffab8: 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+7: x/s $r0  0xbefffab0: "Hi, U!"
+...</pre>
+<p> You can verify that the hexadecimal codes displayed at 8: are equivalent
+  to  the string displayed at 7: . As you step through the loop, you
+  will see the first character change from 0x48 ('H') to 0x68 ('h'), while the
+  lowercase character and punctuation remain the same. You will also see the
+  string appear to shrink as
+<span class="register">r0</span> is incremented.</p>
+<p>An alternative to stepping through each statement is to put a breakpoint in 
+  the loop, for example at the <span class="sourcecode">bne</span> statement. Once the break is in place, you 
+  can continue from the break each time, to see the execution of a complete loop. 
+  Each iteration of the loop will change at most one character.</p>
+<p><b>Self Test</b></p>
+<ol>
+  <li> (4) Suppose the string: <span class="userTyped">Oh!</span> were entered at the prompt. List the values
+    in
+<span class="register">r1</span> and
+<span class="register">r2</span>, each time execution reaches the "bne" statement.</li>
+  <li> (2)&#9;Why is the comparison with 'Z' necessary? List a string that
+    would be incorrectly converted, if this test and the branch were commented
+    out.</li>
+  <li> (2) Why is the <span class="sourcecode">or</span> operation used, instead of 
+  <span class="sourcecode">add</span>?
+    List a string that would be incorrectly converted by an add instruction.</li>
+  <li> (1) When you enter successive strings, then display memory in the debugger,
+    the result looks oddly scrambled. For example, if you enter the strings:</li>
+<pre><font size="1">&gt; THIS IS A TEST.
+  this is a test.
+&gt; and ANOTHER
+  and another
+&gt; 3rd Time</font></pre>
+and display memory during the interrupt on the third try, you will see a hex 
+    dump similar to this:
+<pre>
+8: x/16xb $r0
+0xbefffab0:  0x33 0x72 0x64 0x20 0x54 0x69 0x6d 0x65
+0xbefffab8:  0x00 0x65 0x72 0x00 0x73 0x74 0x2e 0x00</pre>
+what are the characters 0x68 ... 0x2e doing at the end of the string, and
+    why don't they display on the next line?
+  <li> (3) Change this function to convert all the lowercase characters to
+    uppercase. (Warning: check your characters carefully!)</li>
+</ol>
+<p><b>Assignments</b></p>
+<p>Write the following procedures or functions in assembly language, with an
+  appropriate  C++ main program to prompt for arguments and display results.
+  Note that you will want to edit the <a href="gdb.ini" target="gdb">gdb.ini</a> file
+  to display arguments appropriately.</p>
+<ol class="assignment">
+  <li><span class="sourcecode">int max(int* A, int N)</span> returns the largest value in integer array A, of
+    length N.</li>
+  <li><span class="sourcecode"> int vowels(char* S)</span> returns the number of vowels in string S.</li>
+  <li><span class="sourcecode"> int sum(int* A, int N)</span> returns the sum of integer array A, of length N.</li>
+  <li><span class="sourcecode"> int compare(char* R, char*  S)</span> compares strings R and S, returning 1 if
+    R&gt;S, 0 if
+    R=S, and -1 if R&lt;S.</li>
+  <li> <span class="sourcecode">int find(char* S, int c)</span> returns the first location of character c in
+    string S, or -1 if c is not found.</li>
+  <li> <span class="sourcecode">int copyabc(char* R, char* S)</span> copies the letters in string R to S. <br>
+    (for example, if R = "Hello, World!" then S = "HelloWorld")</li>
+</ol>
+<script>writeFooter()</script>
+</body>
+</html>

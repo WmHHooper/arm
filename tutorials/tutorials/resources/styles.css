@@ -1,0 +1,140 @@
+h1 {
+	text-align:center;
+	font-size:larger;
+	font-weight:bold;
+}
+
+sub {  
+	font-size: x-small;
+}
+
+sup { 
+	font-size: x-small;
+}
+
+ol.assignment {
+	counter-reset: assignment-counter;
+}
+
+ol.assignment li {
+	list-style-type: lower-alpha;	
+}
+
+ol.assignment li:before {
+    font-weight: bold;
+}
+
+/*
+	The FAQ file has a common format for questions and answers.
+	They are typically formatted as:
+	<li style="question">...
+	  <p style="answer">...</p></li>
+ */
+.question {  
+	font-style: italic;
+}
+
+.answer {
+	color: #006;
+	font-style: normal;
+}
+
+/*
+	Code commentary uses a style of outdented line numbers
+	and indented explanation, e.g.:
+		1: comments on
+		  line 1 ...
+ */
+.hangingindent, .hungindent {
+    padding-left: 2em;
+}
+
+.hangingindent {
+    text-indent: -1em;
+}
+
+/*
+	Excerpts and references to code and machine dialog.
+ */
+pre, .sourcecode, .userTyped, .register {
+	font-family: monospace;
+}
+
+pre {  
+  padding-left: 2em;
+	font-size: smaller;
+	font-style: normal;
+}
+
+.copyright {
+	font-size: xx-small;
+}
+
+.sourcecode {
+	white-space: nowrap;
+}
+
+.register {
+	font-weight:bold;
+}
+
+.userTyped {
+	background-color: #FF0;
+}
+
+.ignore {
+	background-color: #CCC;
+}
+
+.right-margin {
+	right: 0px;
+}
+
+.centered-cells td {
+	text-align: center;
+}
+
+.left-top-right {
+	border-top-style: solid;
+	border-right-style: solid;
+	border-bottom-style: none;
+	border-left-style: solid;
+}
+
+.left-bottom {
+	border-top-style: none;
+	border-right-style: dotted;
+	border-right-width:thin;
+	border-bottom-style: solid;
+	border-left-style: solid;
+}
+
+.right-bottom {
+	border-top-style: none;
+	border-right-style: solid;
+	border-bottom-style: solid;
+	border-left-style: dotted;
+	border-left-width:thin;
+}
+
+.left-right {
+	border-right-style: dotted;
+	border-right-width:thin;
+	border-left-style: dotted;
+	border-left-width:thin;
+}
+
+.repeating-bits {
+	border-top:medium;
+	border-top-color: #000;
+	text-decoration: overline;
+}
+
+#NavBar {
+	text-align:center;
+	font-size:medium;
+	font-weight:bold;
+}
+.warning {
+	color: #F00;
+}

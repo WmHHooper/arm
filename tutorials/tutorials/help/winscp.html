@@ -1,0 +1,73 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<title>Editing with WinSCP</title>
+</head>
+
+<body>
+<h1>Editing remote files with WinSCP</h1>
+<script>wNavbar()</script>
+<ol>
+  <li>Download and install WinSCP from:<br />
+  <a href="http://winscp.net/eng/download.php" target="download">http://winscp.net/eng/download.php</a> </li>
+  <li>Connect to the CSC File Server:
+    <ol>
+      <li>Launch WinSCP. After the first-time user dialog, you should reach the
+        host selection window below:<br />
+      <img src="images/winscp.png" width="538" height="346" alt="winscp" />        </li>
+      <li>Enter <strong>csc.belmont.edu</strong> as the Host Name, and be sure
+        to select the <strong>SFTP</strong> Protocol. WinSCP should select Port
+        number 22 automatically when you select <strong>SFTP</strong>. Enter
+        your User name and password, then click the <strong>Login</strong> button.
+        The first time you do this, you will be prompted to accept the host key
+        from the CSC Server. Click <strong>Yes</strong>, and you should see a
+      new screen like the following:<br />
+      <img src="images/winscp-home.png" width="445" height="327" alt="home" /></li>
+      <li>Double-click the private folder. The address will change to 
+      <span class="sourcecode">/home/csc/<em>username</em>/private/</span>
+        window will change to show the contents of your public folder.</li>
+      <li>Double-click the csc2110 folder. Note the change in address and view.</li>
+      <li>Double-click the tutorials folder. Note the change in address and view.</li>
+      <li>Double-click the  folder for your current tutorial. The address should read <span class="sourcecode">/home/csc/<em>username</em>/private/csc2110/tutorials/t<em>N</em>/</span>,
+        where N is the letter of your tutorial, and the folder window should
+        display the files for your tutorial. The folder for Tutorial 0 is shown
+        below as an example.</li>
+      <img src="images/winscp-t0.png" width="467" height="262" alt="t0" />
+</ol>
+  </li>
+  <li>Edit files:
+    <ol>
+      <li>To edit a file, for example t0m.cpp, right-click the file and choose
+        Edit from the pop-up menu. An editor window appears like the one
+        below:<br />
+        <img src="images/winscp-edit.png" width="526" height="208" alt="edit" /></li>
+      <li>Note the line number at the bottom left corner of the window. As
+        you debug files, line numbers will guid you to checkpoints and errors.</li>
+      <li>The disk icon <img src="images/winscp-disk-icon.jpg" alt="disk" width="18" height="17" align="top" />,
+        second from left in the toolbar, is gray when the file you are editing
+        is in sync with the copy on the Playstation 3, but turns bold when
+        you make changes that have not yet been saved. Normally, you will
+        want to save early and often!</li>
+      <li>You can open as many edit windows as you need to do the tutorial,
+        and leave them open as long as you need. Close the edit windows when
+        you are done; you will be prompted to save any final changes.</li>
+    </ol>
+  </li>
+  <li>Disconnect
+      <ol>
+        <li>When you close the main WinSCP window, you will be reminded that
+          you are disconnecting from the server. Click &quot;Yes&quot;, and
+          your connection will be closed. Return to Step 2.1 to resume editing.</li>
+        <li>If you leave your computer while the WinSCP window is open, it
+          will eventually disconnect from the server on its own. When you return,
+          you will be prompted to restore the connection; however, you will
+          have to wait for the connection to be re-established, and you may
+          have to return to Step 2.1 in order to complete the connection.</li>
+      </ol>
+  </li>
+</ol>
+<script>writeFooter()</script>
+</body>
+</html>

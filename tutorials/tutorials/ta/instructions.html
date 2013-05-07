@@ -1,0 +1,186 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<script>wTitle()</script>
+</head>
+<body>
+<h1>ta: Floating-Point Formats</h1>
+<script>wNavbar()</script>
+<p>This tutorial illustrates the two floating-point formats recognized by the 
+  <script>writeProcessorName()</script>
+  . Double-precision is a 64-bit format, while single-precision uses 32 
+  bits. Both formats conform to the IEEE 754 standard for floating-point numbers. 
+  <a href="ta.s" target="ta">ta.s</a> converts
+  a double-precision number to single-precision. 
+  <a href="tam.cpp" target="tam">tam.cpp</a>,
+  the main program, stores values in a double-precision variable, calls the
+  conversion procedure, then prints the single-precision result to verify the
+  conversion. </p>
+<p>The  instruction set of the 
+  <script>writeProcessorName()</script>
+in your 
+<script>writeLongMachineName()</script> 
+makes this program obsolete, as it contains a complete vector floating point
+(VFP) processor. Cheaper and simpler versions of the ARM, however, still use
+software conversion routines like this; when an ARM processor without floating-point
+hardware executes an instruction like <span class="sourcecode">fmadd</span>,
+an illegal instruction exception triggers an exception handler, which looks up
+the instruction and performs the floating point operation in software. </p>
+<p>The main program 
+  <a href="tam.cpp" target="tam">tam.cpp</a> is straightforward.
+  Some notes about the function in 
+  <a href="ta.s" target="ta">ta.s</a> are
+  as follows:</p>
+<div class="hangingindent"> 
+  <p>15: Move the 64-bit double-precision bit pattern into  integer registers.
+    This instruction transfers the least significant bits of 
+    <span class="register">d0</span> into 
+    <span class="register">r1</span>, and
+    the most significant bits into 
+    <span class="register">r2</span>. Registers 
+    <span class="register">d0..d15</span> and 
+    <span class="register">s0..s15</span> cannot be
+    manipulated with the bit-wise operators we use to separate signs, exponents,
+    and mantissas. Instead, we use their addresses to move them between memory
+  and the integer registers, bypassing the FPR&#146;s.</p>
+  <p>17-19: Assemble the 23-bit mantissa from the 20 least significant bits of
+    <span class="register">r2</span> and the three most significant bits of 
+    <span class="register">r1</span>.</p>
+<p> 21-24: Calculate the exponent. The
+  original exponent is 11 bits, while the new exponent is only eight. We convert 
+  <span class="register">r3</span> from
+    excess-1023  to excess-127 notation by subtracting 896 
+    (<span class="sourcecode">r3 - 1023 + 127 = r3 - 896</span>).</p>
+  <p> 26-27: Copy the sign bit from 
+  <span class="register">r2</span> to 
+  <span class="register">r0</span>.</p>
+  <p> 29: Move the completed bit pattern to 
+  <span class="register">s0</span>, 
+  the return register for single-precision floating point.</p>
+</div>
+<p> Compile and run this program. Enter various floating-point values and see
+   which of them are properly converted. Note the format for input in scientific
+   notation: enter 200,000,000,000 as <span class="sourcecode">2.0e11</span>. What is the largest
+   value that converts correctly? What happens if you enter a value too large?
+   What fractions convert correctly, and what errors do you have? what is the
+   smallest value that converts correctly? What happens if you enter a value
+   too small?   </p>
+<p> When you are satisfied that you understand the responses of the program,
+  use the 
+  <span class="userTyped">gdb ta</span>,
+  set a breakpoint at <span class="sourcecode">DoubleToSingle</span>, enter run
+  at the <span class="sourcecode">(gdb)</span> prompt, and enter <span class="userTyped">-1.2</span> at
+  the <span class="sourcecode">&gt;</span> prompt. The debugger output will display
+  the input value and the next instruction:</p>
+<pre>9: /f $d0 = -1.2
+...
+=&gt; 0x8978 &lt;DoubleToSingle&gt;:     vmov    r1, r2, d0</pre>
+<p>Compare the instruction to line 15 of 
+  <a href="ta.s" target="ta">ta.s</a>. The
+  debugger is using Vector Floating Point (VFP) mnemonics to disassemble your
+  program. These are equivalent to the floating point mnemonics we used to write
+  the program; a translation can be found in the 
+  <a href="../intro.html#ref" target="intro">ARM Architecture Reference Manual</a>. 
+  Step forward an instruction, and note the
+  change in 
+  <span class="register">r1..r2</span>:</p>
+<pre>...
+6: /x $r1 = 0x33333333<br>5: /x $r2 = 0xbff33333
+...</pre>
+<p>Concatenating these two registers, we see the IEEE 754 representation of the
+  value in 
+  <span class="register">d0</span>: a sign bit of 
+  <span class="sourcecode">1<sub>2</sub></span>, an exponent of 
+  <span class="sourcecode">01111111111<sub>2</sub></span>, and a
+  repeating mantissa of 
+  <span class="sourcecode">1.0011...<sub>2</sub></span> 
+  (remember that the leading
+  <span class="sourcecode">1.</span>
+  bit of the mantissa is hidden). Stepping through the next three instructions, we  observe:</p>
+<pre>...
+7: /x $r0 = 0x199999
+...</pre>
+<p>that 23 bits of the mantissa have been copied
+into the least significant bits of 
+<span class="register">r0</span>. As we step through the next four instructions,
+we see the exponent 
+<span class="sourcecode">0x3ff</span> copied into 
+<span class="register">r3</span>, then converted to 
+<span class="sourcecode">0x7f</span>, the equivalent
+representation in single-precision, and copied into bits 30-23 or 
+<span class="register">r0</span>:</p>
+<pre>...
+7: /x $r0 = 0x3f999999<br>...<br>4: /x $r3 = 0x7f
+...</pre>
+<p>Two more instructions, and we see the sign bit copied into 
+  <span class="register">r3</span>,
+  and back into bit 31 of 
+  <span class="register">r0</span>:</p>
+<pre>...
+7: /x $r0 = 0xbf999999<br>...<br>4: /x $r3 = 0x1
+...</pre>
+<p>Finally, we see 
+  <span class="register">r0</span>
+  copied to
+  <span class="register">s0</span>:</p>
+<pre>...
+8: /f $s0 = -1.19999993<br>7: /x $r0 = 0xbf999999
+...</pre>
+<p>and that the value has suffered
+  a little in translation. Enter <span class="userTyped">continue</span>, and
+  the program prints:</p>
+<pre>-1.2(D) = -1.19999993(F)</pre>
+<p>a value which reflects one limitation of the single-precision floating point format. </p>
+<p>Step through another conversion on your own, and predict the results of each
+  step in the conversion. Enter <span class="userTyped">q</span> at the <span class="sourcecode">&gt;</span> prompt to halt the program, and <span class="userTyped">quit</span> at the <span class="sourcecode">(gdb)</span> prompt to exit the debugger.</p>
+<p><b>Self-Test</b></p>
+<ol>
+  <li>(6) Trace the execution of <span class="sourcecode">DoubleToSingle()</span>when
+      D = 0.375 . List each value assigned to 
+      <span class="register">r3</span> and 
+      <span class="register">r0</span>,
+    and explain its significance.</li>
+  <li>(2) Explain what happens when D = 0, and why.</li>
+  <li>(2) What is the largest number that <span class="sourcecode">DoubleToSingle()</span> will
+    correctly convert? Explain.</li>
+</ol>
+
+<p><b>Assignments</b></p>
+<p>For each of these assignments, move your floating point arguments into integer
+  registers,  use integer arithmetic and logical operations to make the required
+  conversions, then move them back into the needed floating-point registers.</p>
+<ol class="assignment">
+  <li>Modify <span class="sourcecode">DoubleToSingle()</span> to return the values
+    7F800000<sub>16</sub> 
+    or FF800000<sub>16</sub> (+/- INF), whenever D has a value too large
+     to express in single-precision.</li>
+  <li>Modify <span class="sourcecode">DoubleToSingle()</span> to return the values
+    00000000<sub>16</sub> or 80000000<sub>16</sub> (+/- 0), whenever
+    D has a value too small to express in single-precision (represent denormalized
+    numbers as zeroes).</li>
+  <li>Modify <span class="sourcecode">DoubleToSingle() </span>to store denormalized
+    values, when converting double-precision numbers in the appropriate range.</li>
+  <li>Modify <span class="sourcecode">DoubleToSingle()</span> to
+  round the double-precision mantissa properly, as it is converted to single-precision.</li>
+  <li>Write function <span class="sourcecode">double SingleToDouble(float F)</span>,
+    which returns F converted to double-precision. Do not worry about the conversion
+    of special quantities.</li>
+  <li>Write function <span class="sourcecode">double</span> <span class="sourcecode">Twice(double
+      X)</span>, which
+    returns X*2.</li>
+  <li>Write function <span class="sourcecode">float Twice(float X)</span>, which
+    returns X*2.</li>
+  <li>Write function <span class="sourcecode">float Increment(float X)</span>,
+    which returns X incremented by one unit in the last place. Use this procedure
+    in your main program to find the value of epsilon for the single-precision
+    format. </li>
+  <li>Write procedure <span class="sourcecode">double Increment(double  X)</span>,
+    which returns X incremented by one unit in the last place. Use this procedure
+    in your main program to find the value of epsilon for the double-precision
+    format. </li>
+</ol>
+<script>writeFooter()</script>
+</body>
+</html>

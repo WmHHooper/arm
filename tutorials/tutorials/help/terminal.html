@@ -1,0 +1,75 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<title>Connecting with Terminal</title>
+</head>
+
+<body>
+<h1>Connecting to the 
+  <script>writeLongMachineName()</script>
+with Terminal</h1>
+<script>wNavbar()</script>
+<ol>
+  <li>You will find the Terminal application in the Utilities folder on your
+    Mac, or you can type <span class="userTyped">terminal</span> in the Spotlight search box. Terminal
+    will launch and present a window like the one below. In the figure, commands
+  you type are highlighted in red.</li>
+  <li>Logging in:
+<ol>
+      <li>The ssh program is also installed with your Mac, and is accessible
+        from the command line. Enter the command <span class="userTyped">ssh <em>username</em>@csc.belmont.edu</span>
+        at the local prompt to connect your machine to the CSC Server. The first
+        time you connect, you will be prompted with the server's public key.
+        Answer <span class="userTyped">yes</span> to store the key and continue your session. You will then
+        be prompted for the password; notice that the password characters
+        are <em>not</em> echoed on the screen. When you login correctly, you
+        will see a last login message and a prompt &quot;[<em>username</em>@hl36
+        ~]$ &quot; as shown in the figure.<br />
+        <img src="images/terminal.png" alt="" name="terminal" width="495" height="199" id="terminal" /></li>
+      <li>At this point, you are logged into the CSC Server, <strong>hl36</strong>,
+        but you have not yet reached the 
+        <script>writeLongMachineName()</script>. Enter the command: &quot;ssh
+        ps3&quot;
+        to complete your login. You prompt should change to &quot;[<em>username</em>@ps3
+        ~]$ &quot; as shown in the figure.</li>
+</ol>
+  </li>
+  <li>Logging out:
+    <ol>
+      <li>You are logged into three machines, so you have to log out of two of
+        them,  in reverse order, to get back to your local machine. To log out
+        of the 
+        <script>writeLongMachineName()</script>, enter the <span class="userTyped">exit</span> command
+        at the <strong>ps3</strong> prompt. Unlike the picture below, the screen
+        actually clears before you see the <span class="sourcecode">Connection ... closed.</span>
+        message and the <strong>hl36</strong> prompt.<br />
+        <img src="images/terminal-logout.png" width="376" height="152" alt="logout" /></li>
+      <li>Enter <span class="userTyped">exit</span> at the <span class="sourcecode">hl36</span> prompt. You will
+        be back at the <strong>local</strong> prompt.</li>
+      <li>You may leave Terminal running, and  begin at step 2.1 the next time
+        you need to connect to the <script>writeLongMachineName()</script>. 
+        Or, you may quit Terminal,
+        in which case you'll have to start at step 1 to reconnect.</li>
+    </ol>
+  </li>
+  <li>In summary:
+    <ol>
+      <li>It is important to notice the three distinct prompts in the
+        Terminal window. Befor you connnect to another machine, the prompt  
+        <span class="sourcecode">[<em>localname</em>@<em>local-machine</em> ~]$ </span>
+        reflects the User Name and machine name you chose for your own Macintosh.
+        The prompt changes to 
+        <span class="sourcecode">[<em>username</em>@hl36 ~]$ </span> when you
+        connect to the CSC server, and again to 
+        <span class="sourcecode">[<em>username</em>@
+        <script>wMPrompt()</script> ~]$ </span> when you connect to the 
+        <script>writeLongMachineName()</script>. Make it a habit to
+        know, at all times, who you are and where you are logged in!</li>
+    </ol>
+  </li>
+</ol>
+<script>writeFooter()</script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<HTML>
+<HEAD>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<script>wTitle()</script>
+</HEAD>
+<body>
+<h1>t2: Labels and Branch Instructions</h1>
+<script>wNavbar()</script>
+<P>This tutorial introduces branching, the mechanism used to implement both if/then/else
+   decision statements and loop constructs of all kinds. To begin this tutorial,
+   change your directory to t2 and review the files 
+  <a href="t2m.cpp" target="t2m">t2m.cpp</a> and 
+  <a href="t2.s" target="t2">t2.s</a>. The C++ file is very similar to that in
+  the previous  tutorials; let's examine
+  <a href="t2.s" target="t2">t2.s</a>:</P>
+<div class="hangingindent"> 
+  <P> 16: The comparison commands are described in sections 2.4, 3.3.1, and B.1.1
+     of the text. In this example, the <span class="sourcecode">cmp</span> instruction
+     compares register 
+<span class="register">r1</span> (the exponent) with zero.</P>
+  <P> 18: One of unusual features of the ARM architecture is that practically
+     every instruction can be made conditional. The <span class="sourcecode">movlt</span> instruction
+      takes advantage of that feature, setting the return value to zero--but
+     only  if the exponent is negative. </P>
+  <P>&#9;19: This is a more conventional branch instruction. The branch will
+    either be taken (skipping the exponent calculation) if the exponent is less
+    than or equal to zero. Note that both <span class="sourcecode">movlt</span> and <span class="sourcecode">ble</span> instructions use
+    the result of the same test, the comparison in line 15.</P>
+  <P>22-24: The <span class="sourcecode">subs</span> instruction
+    decrements
+<span class="register">r1</span>, with the side effect  of setting the condition codes. The 
+<span class="sourcecode">bgt</span> instruction
+    uses the condition  to loop backwards only when
+<span class="register">r1</span> is greater than zero.
+    When
+<span class="register">r1</span> reaches zero, the 
+<span class="sourcecode">gt</span> condition
+    is false, and execution falls through the branch to the return code that
+    follows.</P>
+</div>
+<p>You should run the program at this point, entering various combinations 
+  of X and N to check the results. The program should correctly raise integers
+   to positive integer powers, while truncating negative powers to zero. Enter
+   an noninteger for X, and the program will quit. </p>
+<p><strong>gdb.ini</strong></p>
+<p>Before we  use the debugger, let's see how setup commands
+  work. In each directory, the file named <a href="gdb.ini" target="gdb">gdb.ini</a> contains
+  a list of gdb commands. Each time gdb runs, these commands are read and executed,
+  just as though you had typed them in at the beginning of your debugging session.
+  The commands in the gdb.ini file for this tutorial display registers
+  <span class="register">r0..r3</span>
+  and the 
+  <span class="register">cpsr</span> as hexadecimal values, and the 
+  <span class="register">pc</span>
+  as a pointer to an instruction.
+  In writing the file, I attempted to anticipate the information you will need
+  to debug the tutorials and assignments. However, you may wish to add
+  or remove your own commands to <a href="gdb.ini" target="gdb">gdb.ini</a>, to reflect the way you solve your
+  assignments.</p>
+<P>Launch  the debugger with the command <span class="userTyped">gdb t2</span>.
+  Set a breakpoint at <span class="sourcecode">exponent</span>, run the program,
+  and enter values of 5 and 0 for X and N. Before the the <span class="sourcecode">cmp</span> instruction
+  is executed,
+  <span class="register">cpsr</span> has values inherited from essentially random
+  activity; after the comparison, however,  <span class="register">cpsr</span> becomes:</P>
+<pre>
+1: /x $cpsr = 0x60000010</pre>
+<P>Notice that the first hexadecimal digit of <span class="register">cpsr</span> is 6. Looking
+  up this value in Figure 3.1  of the text, we find that the condition
+bits produced by this comparing zero (in <span class="register">r1</span>) with zero (immediate) are:</P>
+<table border="0" cellpadding="5" cellspacing="0" align="center">
+  <tr align="center"> 
+    <td> 0</td>
+    <td>1</td>
+    <td>1</td>
+    <td>0</td>
+  </tr>
+  <tr align="center"> 
+    <td>N</td>
+    <td>Z</td>
+    <td>C</td>
+    <td>V</td>
+  </tr>
+</table>
+<P>The Z bit makes sense--but why is the Carry set? Save this question for another 
+  chapter!</P>
+<P>As you step further through the program, you find that the program loads 1 
+  into
+<span class="register">r2</span>, ignores the instruction loading 0 into
+<span class="register">r2</span>, and branches to the return 
+  label, which puts the 1 into
+<span class="register">r0</span>. Continuing from the return statement, we find 
+  that 1 is indeed returned as the result of 5^0.</P>
+<P>Let the program run, but this time enter 5 and -1. Which the condition bits 
+  are set this time? Note that the processor visits exactly the same instructions 
+  as before, only this time the program really does load 0 into
+<span class="register">r2</span>.</P>
+<P>Now that you have traced the behaviour of simple decision sequences, loops 
+  will not seem much more difficult. Enter an X and N of "2 3", and step through 
+  the function. You will see the following points of interest:</P>
+<div class="hangingindent"> 
+  <p>19: Note that the CPSR = 0x20000010. Since the N and Z bits are both zero,
+    the <span class="sourcecode">ble</span> instruction
+     is ignored, and we proceed into the main loop.</p>
+  <p>22: The <span class="sourcecode">subs</span> 
+  instruction subtracts one from
+<span class="register">r1</span>, storing a <span class="sourcecode">2</span> 
+    there, and setting the CPSR to 0x20000010. Since the result of the subtraction
+      is a positive integer, the <span class="sourcecode">N</span> 
+    and <span class="sourcecode">Z</span> bits are both clear.</p>
+  <p>23: We multiply 1 by 2, putting 2 into
+<span class="register">r2</span>. <span class="register">cpsr</span> does not change.</p>
+  <p>24: Since N and Z are clear, we take the branch, meaning that the next instruction
+     is... </p>
+  <p>22: Again, we subtract 1 from
+<span class="register">r1</span>, leaving 1 there. What are
+    the condition bits?</p>
+  <p>23: We multiply 2 by 2, putting 4 into
+<span class="register">r2</span>.</p>
+  <p>...</p>
+</div>
+<P>Keep stepping, and you should be able to predict when the backward branch is 
+  finally ignored. Once you are sure you know how the program works, you are ready 
+  to write your own.</P>
+<P><b>Self Tests</b></P>
+<ol>
+  <li>(4) List each statement executed, and each general register changed,
+    when the following values of X and N are entered:&#9; </li>
+  <table width="75%" border="0" align="center">
+    <tr> 
+      <td>a. 5 2</td>
+      <td> 
+        <p>b. 5 -2</p>
+      </td>
+    </tr>
+  </table>
+  <li>(2) Suppose the CPSR reads 0x40000010, and the pending instruction is &quot;blt
+     label&quot;. Will the branch be taken? Explain why or why not. 
+  </li>
+</ol>
+<P><b>Assignments</b></P>
+<P>Name your files <B>t2s</B><I>x</I><B>.s</B> and <B>t2s</B><I>x</I><B>m.cpp</B>, 
+  replacing the <I>x</I> with the letter of your individual assignment. In each 
+  case, the .s file will contain a function in assembly, while the .cpp file will 
+  contain a main program that takes arguments and prints a result.</P>
+<ol class="assignment">
+  <li><span class="sourcecode">int sum(int n, int m)</span> sums the integers n through m. If n &gt; m, return
+    zero.</li>
+  <li><span class="sourcecode">int fib(int n)</span> computes the n<U>th</U> fibonacci number, NON-recursively.</li>
+  <li> <span class="sourcecode">int factor(int n)</span> returns the first number that evenly divides n (if n
+    is prime, return n)</li>
+  <li> <span class="sourcecode">int grade(int n)</span> returns the character 'A' if n &gt;= 90, 'B' if 90 &gt; n &gt;=
+     80, etc. (Use the ASCII code.)</li>
+  <li><span class="sourcecode">int permutations(int n, int k)</span> returns the factorial of n!/(n-k)! (= n(n-1)(n-2)...(n-k+1)).</li>
+  <li><span class="sourcecode">int max(int a, int b, int c, int d)</span> returns
+    the largest value, a, b, c, or d.</li>
+  <li><span class="sourcecode">int right(a,b,c)</span> returns 1 if a triangle with sides of length a,b,c is
+    a right triangle, 0 otherwise.</li>
+  <li>Rewrite <span class="sourcecode">ftoc()</span> from
+<script>writeNamedTutorial('ftoc')</script>, 
+    so that it rounds all temperatures towards 
+  zero.</li>
+</ol>
+<script>writeFooter()</script>
+</BODY>
+</HTML>

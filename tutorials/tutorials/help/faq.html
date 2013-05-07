@@ -1,0 +1,99 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<title>Frequently Asked Questions</title>
+</head>
+<body bgcolor="#FFFFFF" text="#000000">
+<h1>Frequently Answered Questions </h1>
+<script>wNavbar()</script>
+<ol>
+  <li class="question">Do I have to do these tutorials?
+  <p class="answer">The tutorials cover several of your weekly homework assignments,
+     about 1/3 of your total homework grade. Check the <a href="https://csc.belmont.edu/hooper/csc2110/policies.html" target="policies">syllabus</a>,
+  and do the math.</p></li>
+  <li class="question">'make' is giving me a bunch of errors:<pre>
+[<script>writeUserName()</script>@myMac t1]$ <span class="userTyped">make t1</span>
+gcc -c t1.s
+t1.s:1:Junk character 64 (@).
+t1.s:1:Rest of line ignored. 1st junk character valued 32 ( ).
+...</pre>
+How do I fix it?
+  <p class="answer">The key to the problem is  in your prompt. The <span class="sourcecode">@myMac</span> means
+    you are working with a copy of the tutorials on your machine, rather than
+    the on the
+    <script>writeLongMachineName()</script>
+    . Copy any edits to your 
+    <script>wMAbr()</script>
+account, and login to the
+<script>writeLongMachineName()</script>
+. Similarly, errors like this:</p>
+  <pre>
+[<script>writeUserName()</script>@hl36 t1]$ <span class="userTyped">make t1</span>
+gcc -c t1.s
+t1.s: Assembler messages:
+t1.s:1: Error: junk at end of line, first unrecognized character is `@'
+...</pre>
+  <p class="answer">mean that you are trying ot compile on the login server,
+    <span class="sourcecode">hl36</span>, and you should login to the 
+    <script>writeLongMachineName()</script>
+    . An
+    error message like this:</p></li>
+    <pre>
+[<script>writeUserName();documant.write('@');wMPrompt()</script> ~]$ <span class="userTyped">make t1</span>
+make: *** No rule to make target `t1'. Stop.</pre>
+  
+<p class="answer">means that your current directory, ~, is incorrect, and you
+  should change to the <span class="sourcecode">t1</span> directory. Before you
+  make, check your prompt: are you are logged in 
+  
+  <script>document.write('<span class="sourcecode">@');wMPrompt();document.write('</span>,')</script>
+   
+  in the correct directory?</p>
+<li class="question">I keep changing the program, but it runs exactly the same
+  way. What gives?
+  <p class="answer"> Be sure that the copy you are editing is the copy you
+    are compiling. You can check from the command line by typing, for example:</p>
+  <pre>
+[<script>writeUserName();documant.write('@');wMPrompt()</script> t1]$ <span class="userTyped">cat t1.s</span>
+@ CSC 2110, Computer Organization
+@ Tutorial 1: Introduction to Assembly
+...
+  .ident  "Aamy Aardvark"
+[<script>writeUserName();documant.write('@');wMPrompt()</script> t1]$ </pre>
+  <p class="answer">If the file you see on the command line is different 
+    from the one you've been editing, you're working on the wrong copy.</p>
+</li>
+  <li class="question">GDB doesn't recognize my breakpoints. Here's a transcript:
+    <pre>
+[<script>writeUserName();documant.write('@');wMPrompt()</script> t1]$ <span class="userTyped">gdb t1</span>
+...
+t1: No such file or directory.
+...
+(gdb) <span class="userTyped">br ftoc</span>
+No symbol table is loaded.  Use the &quot;file&quot; command.
+Make breakpoint pending on future shared library load? (y or [n]) 
+(gdb) </pre>
+    <p class="answer">Your last compilation failed, so there is no executable
+      file  to debug. Quit GDB, scroll your terminal window back to the last
+      compilation, find out what the error was, correct the code, re-compile,
+      and resume debugging. </p>
+<p class="answer">This
+      error is less insidious that it could be; if your compilation fails, but there
+      is an executable file left over from a previous effort, it may take you
+      many steps of debugging before you realize you're debugging the wrong file! Before
+    you debug, check that the last compilation succeeded.</p>
+  </li>
+  <li class="question">to be continued...
+    <p class="answer">Please mail any questions you have about these tutorials
+      to <a href="mailto:william.hooper@belmont.edu?subject=Tutorial Question">william.hooper@belmont.edu</a>.</p>
+  </li>
+  <!--
+  <li class="question">Q?
+  <p>A</p></li>
+-->
+</ol>
+<script>writeFooter()</script>
+</body>
+</html>

@@ -1,0 +1,472 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<script>wTitle()</script>
+</head>
+<body>
+<h1>ARM Processor Development on the Raspberry Pi</h1>
+<p>
+  <script>wNavbar()</script>
+</p>
+<p>This narrative describes the process I used to set up and maintain the 
+  <script>writeLongMachineName()</script> 
+  for machine language programming. Not all these steps are necessary, and your
+  mileage will vary.
+</p>
+<ol>
+  <li>Selected Intermediary Machine
+    <ol>
+      <li>Hardware requirements: SD slot</li>
+      <li>Software requirements: SSH client, rsync client, text editor</li>
+      <li>My choice: Macbook Pro, OS X 10.7</li>
+    </ol>
+  </li>
+  <li>Created bootable SD card:
+    <ol>
+      <li><s>Ordered directly from Rasperry Pi</s>        <br />
+        My order was lost.  
+           Besides, the pre-ordered image uses software floating point emulation,
+           and I wanted to program the hardware floating-point unit.      </li>
+      <li>My choice: SanDisk 32GB SD card</li>
+      <li>Download a disk image
+        from <a href="http://www.raspberrypi.org/downloads" target="download">http://www.raspberrypi.org/downloads</a>
+        <ol>
+          <li>My choice: Arch Linux (includes access to hardware floating point
+            unit)</li>
+          <li>Documentation at: <a href="http://archlinuxarm.org/" target="ref">http://archlinuxarm.org/</a></li>
+        </ol>
+      </li>
+      <li>Copy image to card:
+        <ol>
+          <li><s>attempted RPi-sd card builder v1.2</s> - failed</li>
+          <li>Used OS X command line, described at 
+            <a href="http://elinux.org/RPi_Easy_SD_Card_Setup" target="ref">http://elinux.org/RPi_Easy_SD_Card_Setup</a>
+          </li>
+        </ol>
+      </li>
+      <li>Don't forget to eject the card before you remove it from
+        the slot!</li>
+    </ol>
+  </li>
+<li>Connected RPi
+  <ol>
+    <li><img src="images/dont-use.png" alt="RCA cable" width="96" height="72" align="right" >
+    <img src="images/HDMI-Connector.jpg" alt="RCA cable" width="96" height="72" align="right">
+    <s>NTSC</s> - no apparent output<br>
+    HDMI to 720p television</li>
+    <li>USB keyboard</li>
+    <li><s>USB mouse</s> - not needed.<br />
+      The Arch Linux distribution does not include a GUI by default. You can
+      install one, apparently, but I didn't need it for my purposes.</li>
+    <li>Ethernet, to same local net as intermediary machine</li>
+    <li>LAST, power
+      <ol>
+        <li>power source options
+          <ol>
+            <li>micro-usb charger, 700 mA</li>
+            <li>cell-phone battery, 500 mA</li>
+          </ol>
+        </li>
+        <li>PWR light glowed red</li>
+        <li>ACT light blinked</li>
+        <li>Eventually, FDX, LNK, and 100 lights glowed green</li>
+        <li>Television displayed the logo, then diagnostics, and finally:
+          <pre>
+...
+alarmpi login: </pre>
+        </li>
+        <li>'alarmpi' = <u>A</u>rch <u>L</u>inux <u>ARM</u> for the Raspberry <u>Pi</u></li>
+      </ol>
+    </li>
+    </ol>
+</li>
+<li>First console session:
+  <ol>
+    <li>Changed root password
+      <pre>
+alarmpi login: <span class="userTyped">root</span>
+password: <span class="userTyped">root</span>
+[root@alarmpi ~]# <span class="userTyped">passwd</span>
+Enter new UNIX password: <span class="userTyped">~~~~~~~~</span>
+Retype new UNIX password: <span class="userTyped">~~~~~~~~</span>
+passwd: password updated successfully </pre>
+    <li>Found IP address
+      <pre>
+[root@alarmpi ~]# <span class="userTyped">ifconfig</span>
+eth0: ...
+        inet 192.168.1.83  ...
+...
+[root@alarmpi ~]# exit
+alarmpi login: </pre>
+    </li>
+  </ol>
+</li>
+<li>First remote session:
+  <ol>
+    <li>Open ssh client (Terminal  on the Mac).</li>
+    <li>Terminal window dialog:</li>
+  </ol>
+</li>
+<pre>   [hooper@whh-MBPro13 ~]$ <span class="userTyped">ssh root@192.168.1.83</span>
+   The authenticity of host '192.168.1.83 (192.168.1.83)' can't be established.
+   RSA key fingerprint is ab:cd:ef:01:23:45:67:89:a1:b2:c3:d4:e5:f6:07:18.
+   Are you sure you want to continue connecting (yes/no)? <span class="userTyped">yes</span>
+   Warning: Permanently added '192.168.1.83' (RSA) to the list of known hosts.
+   root@192.168.1.83's password: <span class="userTyped">~~~~~~~~</span>
+   Last login: Wed Dec 31 18:11:53 1969 from 192.168.1.71
+   [root@alarmpi ~]# </pre>
+
+<li>Shut down the RPi:
+  <pre>
+[root@alarmpi ~]# <span class="userTyped">poweroff</span>
+...
+The system is going down for power-off NOW!
+...
+Connection to 192.168.1.83 closed.
+[hooper@whh-MBPro13 ~]$</pre>
+</li>
+<li>Disconnected television and keyboard.</li>
+<li>Rebooted and logged in
+  <ol>
+    <li>Interrupted power to reboot.    </li>
+    <li>When  FDX, LNK, and 100 lights glow green, it's ready for remote
+      login</li>
+    <li>Remote login, as before. The machine should keep the IP address on
+      the local network for 'several' days, even if it's off. The exact number
+      of days depends on your local network policy, not the RPi.</li>
+    </ol>
+</li>
+<li>Fixed the clock:</li>
+<pre>
+[root@alarmpi ~]# rm /etc/localtime 
+[root@alarmpi ~]# ln -s  /usr/share/zoneinfo/America/Chicago /etc/localtime
+[root@alarmpi ~]# exit
+alarmpi login:</pre>
+<li>Installed packages:
+  <ol>
+    <li>system - go ahead and obtain all the bug fixes, to minimize problems
+      later. -Su upgrades the system, -yy updates the pacman databases.
+      <pre>[root@alarmpi ~]# <span class="userTyped">pacman -Syyu</span>
+:: Synchronizing package databases...
+...
+Replace dbus-core with core/dbus? [Y/n] <span class="userTyped">Y</span>
+...
+Proceed with installation? [Y/n] <span class="userTyped">Y</span>
+...
+(65/65) upgrading wpa_supplicant  [#############] 100%</pre></li>
+    <li>compiler - you need gcc and make to compile the tutorials, and gdb to
+      debug them
+      <pre>[root@alarmpi etc]# <span class="userTyped">pacman -Syy gcc</span>
+:: Synchronizing package databases...
+...
+Proceed with installation? [Y/n] <span class="userTyped">Y</span>
+...
+(10/10) installing gcc  [#############] 100%
+[root@alarmpi etc]# <span class="userTyped">pacman -S make</span><br />resolving dependencies...
+...
+Proceed with installation? [Y/n] <span class="userTyped">Y</span>
+...
+(1/1) installing make   [#############] 100%
+[root@alarmpi etc]# <span class="userTyped">pacman -S gdb</span><br />resolving dependencies...
+...
+Proceed with installation? [Y/n] <span class="userTyped">Y</span>
+...
+(3/3) installing gdb   [#############] 100%</pre>
+    </li>
+    <li>ntp - without correct time, make will not recompile the correct targets.
+      Unfortunately, the default NTP utility does not run correctly.
+      <pre>[root@alarmpi ~]# <span class="userTyped">pacman -R openntpd</span><br />checking dependencies...
+...
+Do you want to remove these packages? [Y/n] <span class="userTyped">Y</span>
+...
+(1/1) removing openntpd   [#############] 100%
+[root@alarmpi ~]# <span class="userTyped">pacman -S ntp</span><br />resolving dependencies...
+...
+Proceed with installation? [Y/n] <span class="userTyped">Y</span>
+...
+(1/1) installing ntp   [#############] 100%
+[root@alarmpi ~]# <span class="userTyped">systemctl enable ntpd</span>
+[root@alarmpi ~]# <span class="userTyped">cp /usr/lib/systemd/system/ntpd.service /usr/lib/systemd/system/ntpd.service-2013-01-10</span>
+[root@alarmpi ~]# <span class="userTyped">nano /usr/lib/systemd/system/ntpd.service</span></pre>
+      Nano opens a screen displaying the NTP configuration file. Within nano,
+      I commented out the original ntp line, and replaced it with the shorter
+      one.
+  <pre>
+#ExecStart=/usr/bin/ntpd -g -u ntp:ntp
+ExecStart=/usr/bin/ntpd -gq</pre>
+      I then exited nano by typing Ctrl-X (That's what ^X means in the menu at
+      the bottom). With functional startup instructions installed, I set up
+      NTP to run every time the system boots:
+      <pre>
+[root@alarmpi ~]# <span class="userTyped">systemctl enable ntpd</span>
+[root@alarmpi ~]# <span class="userTyped">systemctl start ntpd</span>
+[root@alarmpi ~]# <span class="userTyped">date</span>
+Thu Jan 10 12:48:39 CST 2013</pre>
+    </li>
+    <li>sudo - because it's dangerous to run everything as root!
+      <pre>[root@alarmpi etc]# <span class="userTyped">pacman -S sudo</span><br />resolving dependencies...
+...
+Proceed with installation? [Y/n] <span class="userTyped">Y</span>
+...
+(1/1) installing sudo   [#############] 100%</pre>
+    </li>
+    <li>rsync - makes it easy to copy whole directories from the intermediary
+      machine into the Raspberry Pi.
+      <pre>[root@alarmpi ~]# <span class="userTyped">pacman -S rsync</span><br />resolving dependencies...
+...
+Proceed with installation? [Y/n] <span class="userTyped">Y</span>
+...
+(1/1) installing rsync   [#############] 100%</pre>
+    </li>
+  </ol>
+</li>
+<li>Created a non-root account, and allowed it to run privileged commands with
+  sudo.
+  <pre>
+[root@alarmpi ~]# <span class="userTyped">useradd -m local</span>
+[root@alarmpi ~]# <span class="userTyped">passwd local</span>
+Enter new UNIX password: <span class="userTyped">~~~~~~~~</span>
+Retype new UNIX password: <span class="userTyped">~~~~~~~~</span>
+passwd: password updated successfully
+[root@alarmpi ~]# </pre>
+  Now that the new user exists, I edited the sudo configuration to enable a privileged
+  group:
+  <pre>
+[root@alarmpi ~]# <span class="userTyped">cp /etc/sudoers /etc/sudoers-2013-10-10</span>
+[root@alarmpi ~]# <span class="userTyped">nano /etc/sudoers</span>
+...
+## Uncomment to allow members of group wheel to execute any command<br />%wheel ALL=(ALL) ALL
+...
+[root@alarmpi ~]# </pre>
+and edited the group configuration to add the new user to the privileged group:
+<pre>
+[root@alarmpi ~]# <span class="userTyped">cp /etc/group /etc/group-2013-10-10</span>
+[root@alarmpi ~]# <span class="userTyped">nano /etc/group</span>
+...
+wheel:x:10:root,local
+...</pre>
+Now I could quit logging in as root:
+<pre>
+[root@alarmpi ~]# <span class="userTyped">exit</span>
+logout
+Connection to 192.168.1.83 closed.
+[hooper@whh-MBPro13 ~]$</pre>
+</li>
+<li>And log in as a local user:
+  <pre>
+[hooper@whh-MBPro13 ~]$ <span class="userTyped">ssh local@192.168.1.83</span>
+local@192.168.1.83's password: <span class="userTyped">~~~~~~~~</span>
+[local@alarmpi ~]$</pre>
+  <p>I could now leave this window open as long as I wanted to work. If I needed
+    to do anything that required root privileges, I used sudo:</p>
+  <pre>
+[local@alarmpi ~]$ <span class="userTyped">sudo <em>root-command</em></span>
+[sudo] password for local: <span class="userTyped">~~~~~~~~</span>
+<em>root-command output</em>
+[local@alarmpi ~]$</pre>
+  <p>When I was
+    done, I shut down the RPi:</p>
+  <pre>
+[local@alarmpi tc]$ <span class="userTyped">sudo poweroff</span>
+[sudo] password for local: <span class="userTyped">~~~~~~~~</span></pre>
+  <p>After I typed the password the Terminal window appeared to freeze, because
+    the RPi had closed the connection in the course of shutting down. Soon,
+    the green communication lights on the RPi shut off. In the terminal window,
+    I eventually saw the confirmation:</p>
+  <pre>Write failed: Broken pipe<br />[hooper@whh-MBPro13 ~]$<br /></pre>
+  <p>At that point, I could leave the RPi plugged in or not, depending on how
+    long I intended to be away. When
+    I was ready to work again, I plugged the RPI back in, waited a few seconds
+    for the green lights, and repeated the login:</p>
+  <pre>
+[hooper@whh-MBPro13 ~]$ <span class="userTyped">ssh local@192.168.1.83</span>
+local@192.168.1.83's password: <span class="userTyped">~~~~~~~~</span>
+[local@alarmpi ~]$</pre>
+</li> 
+<li>Copied the tutorials to the Raspberry Pi. Without closing the Terminal
+  window running my SSH session on the RPi, I opened another Terminal window
+  to  run
+  these commands from the intermediary machine:
+<pre>[hooper@whh-MBPro13 ~]$ <span class="userTyped">cd path/to/my/csc2110/stuff</span>
+[hooper@whh-MBPro13 ~]$ <span class="userTyped">rsync -av tutorials/ local@192.168.1.83:tutorials/</span>
+...
+[hooper@whh-MBPro13 ~]$ </pre>
+</li>
+<li> Back on the RPi, I did some housekeeping:
+  <ol>
+    <li>I compiled and ran the first tutorial:
+      <pre>
+[local@alarmpi ~]$ <span class="userTyped">cd tutorials/t0</span>
+[local@alarmpi t0]$ <span class="userTyped">make t0</span>        
+gcc -g  -c t0.c
+gcc -g  -c t0m.cpp
+c++  -o t0 t0.o t0m.o
+[local@alarmpi t0]$ <span class="userTyped">./t0</span>
+Fibonacci calculator.
+...
+[local@alarmpi t0]$</pre>
+      <p>I checked the rest of the tutorials in the same way.</p>
+    </li>
+    <li>I had a very frustrating time getting GDB to read my initialization files.
+      It took me several hours to realize what was wrong, and another half hour
+      to find the solution. I gave the GDB program permission to read the initialization
+      files in the tutorials folder:
+      <pre>
+[local@alarmpi ~]$ <span class="userTyped">echo 'add-auto-load-safe-path ~/tutorials/t?' &gt; ~/.gdbinit</span></pre>
+    </li>
+    <li>Now, I could check my GDB initialization files:
+      <pre>
+[local@alarmpi ~]$ <span class="userTyped">cd tutorials/t1</span>
+[local@alarmpi t0]$ <span class="userTyped">gdb t1</span>
+...done.
+(gdb) <span class="userTyped">break ftoc</span>
+Breakpoint 1 at 0x8854
+(gdb) <span class="userTyped">run</span>
+...
+F> <span class="userTyped">68</span>
+
+Breakpoint 1, 0x00008854 in ftoc ()
+7: /x $r0 = 0x44
+...
+=> 0x8854 <ftoc>:       sub     r1, r0, #32
+(gdb) </pre>
+      <p>I checked the rest of the tutorials in the same way.</p>
+    </li>
+  </ol>
+</li>
+<li>Moved the RPi to a new local network. 
+  <ol>
+    <li>Instead of reconnecting the RPi to a monitor and running <span class="sourcecode">ifconfig</span>,
+      I just plugged the RPi into the network and power, and polled the network
+      for it:
+      <pre>[hooper@whh-MBPro13-2 ~]$ <span class="userTyped">lan=192.168.1.</span>
+[hooper@whh-MBPro13-2 ~]$ <span class="userTyped">for m in `seq 2 253`</span>
+&gt; <span class="userTyped">do</span> 
+&gt; <span class="userTyped">ping -c 1 -t 1 $lan$m || continue</span>
+&gt; <span class="userTyped">ssh -o ConnectTimeout=1 local@$lan$m date &amp;&amp; break</span>
+&gt; <span class="userTyped">done</span>
+PING 192.168.1.2 (192.168.1.2): 56 data bytes 
+
+--- 192.168.1.2 ping statistics --- 
+1 packets transmitted, 0 packets received, 100.0% packet loss
+...
+--- 192.168.1.86 ping statistics ---
+1 packets transmitted, 1 packets received, 0.0% packet loss
+round-trip min/avg/max/stddev = 1.172/1.172/1.172/0.000 ms
+The authenticity of host '192.168.1.86 (192.168.1.86)' can't be established.
+RSA key fingerprint is 15:3f:94:52:f3:09:3a:ef:0b:29:d0:84:b6:39:cd:90.
+Are you sure you want to continue connecting (yes/no)? <span class="userTyped">yes</span>
+Warning: Permanently added '192.168.1.86' (RSA) to the list of known hosts.
+Wed Apr  3 13:02:33 CDT 2013<br>[hooper@whh-MBPro13-2 ~]$ </pre>
+    </li>
+    <li>When the 'date' command was successful, I knew I had the right machine. I
+      could login as before:
+      <pre>[hooper@whh-MBPro13-2 ~]$ <span class="userTyped">ssh local@192.168.1.86</span><br>Last login: Tue Apr  2 16:18:17 2013 from hl36.csc.belmont.edu<br>[local@alarmpi ~]$</pre>
+    </li>
+  </ol>
+</li>
+<li>Made a backup  of the SD card:
+  <ol>
+    <li>Checked the filesystem type:
+      <pre>
+[local@alarmpi ~]$ <span class="userTyped">mount</span><br>/dev/root on / type ext4 (rw,relatime,data=ordered)
+[local@alarmpi ~]$    </pre>
+    </li>
+    <li>Powered off the RPi.</li>
+    <li>Plugged the SD card into my Mac.</li>
+    <li>Unmounted the DOS partition that appeared on my desktop:
+      <pre>[hooper@whh-MBPro13-2 Desktop]$ <span class="userTyped">sudo diskutil umount /dev/disk1s1</span>
+Password:<span class="userTyped">~~~~~~~~</span>
+Volume NO NAME on disk1s1 unmounted<br>[hooper@whh-MBPro13-2 Desktop]$</pre>
+    </li>
+    <li>Wrote the card image to a desktop file:
+      <pre>
+[hooper@whh-MBPro13-2 ~]$ <span class="userTyped">sudo dd bs=1m if=/dev/rdisk1 of=alarmpi-2013-04-03.img</span><em>
+<span class="warning"># "Warning!! If you reverse the source and target, you can wipe out a lot of data. 
+# This feature has inspired the nickname "dd" Data Destroyer."
+# See: http://www.linuxquestions.org/questions/linux-newbie-8/learn-the-dd-command-362506/</span>
+# ...
+# waited about 25 minutes
+# ...</em>
+30436+1 records in
+30436+1 records out
+31914983424 bytes transferred in 1379.164769 secs (23140805 bytes/sec)
+[hooper@whh-MBPro13-2 ~]$</pre>
+Note that even though the Arch Linux image was only 2 GB, 
+I had written the image onto a 32GB SD card.
+As a result, when it wrote the modified card back to disk, the new image was 32GB.
+    </li>
+    <li>Ejected the old SD card:
+      <pre>[hooper@whh-MBPro13-2 Desktop]$ <span class="userTyped">sudo diskutil eject /dev/disk1</span><br>Disk /dev/disk1 ejected<br>[hooper@whh-MBPro13-2 Desktop]$ </pre>
+    </li>
+    <li>Removed the old SD card from my Mac.</li>
+    <li>Inserted a new SD card into my Mac.</li>
+    <li>Unmounted the DOS partition that appeared on my desktop, and rewrote
+      the card from the image:
+      <pre>
+[hooper@whh-MBPro13-2 Desktop]$ <span class="userTyped">sudo diskutil umount /dev/disk1s1</span>
+Volume NO NAME on disk1s1 unmounted
+[hooper@whh-MBPro13-2 ~]$ <span class="userTyped">sudo dd bs=1m if=alarmpi-2013-04-03.img of=/dev/rdisk1</span>
+<em># ...
+# waited about 25 minutes
+# ...</em>
+dd: /dev/rdisk1: Input/output error<br>0+121281 records in<br>0+121280 records out<br>7948206080 bytes transferred in 1325.498396 secs (5996391 bytes/sec)
+[hooper@whh-MBPro13-2 ~]$</pre>
+Note that the image was 32 GB, but the card was only 8GB, hence the I/O error.
+    </li>
+    <li>Checked the new SD card:
+      <pre>
+[hooper@whh-MBPro13-2 Desktop]$ <span class="userTyped">sudo diskutil umount /dev/disk1s1</span>
+Volume NO NAME on disk1s1 unmounted
+[hooper@whh-MBPro13-2 ~]$ <span class="userTyped">diskutil info /dev/disk1</span>
+   ...
+   Content (IOContent):      FDisk_partition_scheme
+   ...
+   Total Size:               7.9 GB (7948206080 Bytes) (exactly 15523840 512-Byte-Blocks)
+   Volume Free Space:        Not applicable (no file system)
+   Device Block Size:        512 Bytes
+   ...
+[hooper@whh-MBPro13-2 ~]$ <span class="userTyped">diskutil info /dev/disk1s1</span>
+   ...
+   File System Personality:  MS-DOS FAT16
+   Type (Bundle):            msdos
+   Name (User Visible):      MS-DOS (FAT16)
+   ...
+   Total Size:               98.6 MB (98566144 Bytes) (exactly 192512 512-Byte-Blocks)
+   Volume Free Space:        72.8 MB (72804352 Bytes) (exactly 142196 512-Byte-Blocks)
+   Device Block Size:        512 Bytes
+   ...
+[hooper@whh-MBPro13-2 ~]$ <span class="userTyped">diskutil info /dev/disk1s2</span>
+   ...
+   File System:              None
+
+   Partition Type:           Linux
+   ...
+   Total Size:               1.9 GB (1877999616 Bytes) (exactly 3667968 512-Byte-Blocks)
+   Volume Free Space:        Not applicable (no file system)
+   Device Block Size:        512 Bytes
+   ...
+[hooper@whh-MBPro13-2 ~]$ </pre>
+So, the new SD card has the two filesystems on it, but I can't verify the either
+one,  because my Mac laptop can't read an ext4 filesystem.
+I can't resize the root partitions, because I don't have a Mac utility
+that reads/writes ext4 filesystems. 6 of the 8 GB (30 of the 32 GB) are wasted.
+    </li>
+    <li>Ejected and removed the new SD card.</li>
+    <li>Placed the new SD card into the RPi, and plugged it back into power and
+      Ethernet. Green lights confirmed Ethernet activity.</li>
+    <li>Reconnected to RPi:
+      <pre>
+[hooper@whh-MBPro13-2 ~]$ <span class="userTyped">ssh local@192.168.1.86</span>
+Last login: Tue Apr  2 16:18:17 2013 from hl36.csc.belmont.edu
+[local@alarmpi ~]$</pre>
+    </li>
+  </ol>
+</li>
+<li>to be continued...</li>
+</ol>
+<script>writeFooter()</script>
+</body>
+</html>

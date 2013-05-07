@@ -1,0 +1,276 @@
+<HTML>
+<HEAD>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<script>wTitle()</script>
+</HEAD>
+<body>
+<h1>t9: Floating-Point Instructions</h1>
+<script>wNavbar()</script>
+<table width="15%" border="0" cellspacing="0" align="right" class="centered-cells">
+  <tr>
+    <td colspan="2" class="left-top-right">d0</td>
+  </tr>
+  <tr>
+    <td class="left-bottom">s0</td>
+    <td class="right-bottom">s1</td>
+  </tr>
+  <tr>
+    <td colspan="2" class="left-top-right">d1</td>
+  </tr>
+  <tr>
+    <td class="left-bottom">s2</td>
+    <td class="right-bottom">s3</td>
+  </tr>
+  <tr>
+    <td colspan="2" class="left-right">&nbsp;</td>
+  </tr>
+  <tr>
+    <td colspan="2" class="left-right">...</td>
+  </tr>
+  <tr>
+    <td colspan="2" class="left-right">&nbsp;</td>
+  </tr>
+  <tr>
+    <td colspan="2" class="left-top-right">d15</td>
+  </tr>
+  <tr>
+    <td class="left-bottom">s30</td>
+    <td class="right-bottom">s31</td>
+  </tr>
+  <tr>
+    <td colspan="2">Fig. 1: ARM Floating Point Registers</td>
+  </tr>
+</table>
+<P>The ARM specification provides sixteen double-precision floating point registers
+  <span class="register">d0..d15</span>. 
+  Each register holds a 64-bit operand in the IEEE 754 double-precision
+  format. Floating-point instructions typically use with the same opcodes as
+  their integer counterparts, prefixed by the letter <span class="sourcecode">f</span> and
+  suffixed by the letter <span class="sourcecode">d</span> to indicate
+  double- or single-precision operands. Thus, for example, 
+  <span class="sourcecode">faddd d1, d2, d3</span> adds 
+  <span class="register">d3</span> to 
+  <span class="register">d2</span>,
+  storing the result in 
+  <span class="register">d1</span>. No
+  floating point registers are reserved by the runtime system, so your function
+  is free to use all sixteen of them as needed.</P>
+<P>Single-precision conventions are similar, with some quirks. There are thirty-two
+  single-precision registers, <span class="register">s0..s31</span>, 
+  but they overlap their double-precision
+  counterparts as shown in the figure at right. Thus, storing a value in register
+  <span class="register">d0</span> overwrites both 
+  <span class="register">s0</span> and 
+  <span class="register">s1</span>, while storage in 
+  <span class="register">s2</span> overwrites half of 
+  <span class="register">d1</span>. As
+  the documentation notes: &quot;No damage is caused but the results are meaningless.&quot;
+  The mnemonics are suffixed with an <span class="sourcecode">s</span> 
+  <span class="sourcecode">fsubs s1, s2, s3</span> subtracts 
+  <span class="register">s3</span> from 
+  <span class="register">s2</span>,
+  storing the result in 
+  <span class="register">s1</span>. (Notice that the
+  <span class="sourcecode">s</span>suffix, used to set condition
+  codes for integer operations, is not allowed in floating point mnemonics, whether
+  single- or double-precision. To set a condition code based on  floating
+  point registers, use 
+  <span class="sourcecode">fcmp</span>.)  </P>
+<P>Functions read double-precision arguments from 
+  <span class="register">d0</span>, 
+  <span class="register">d1</span>,
+  ..., etc., and return double-precision values in 
+  <span class="register">d0</span>. Likewise,
+  they read single-precision arguments from 
+  <span class="register">s0</span>, <span class="register">s1</span>,
+  ..., etc., and return single-precision values in 
+  <span class="register">d0</span>.
+  Functions with mixed arguments--integer, single- and double-precision--read the
+  integers from 
+  <span class="register">r0</span>, 
+  <span class="register">r1</span>, ..., and fit the floating point arguments into the first
+  registers available. Thus, for example, 
+  <span class="sourcecode">float f(int a, double b, float c)</span> would find 
+  <span class="sourcecode">a</span> in 
+  <span class="register">r0</span>, 
+  <span class="sourcecode">b</span> in 
+  <span class="register">d0</span>,
+  <span class="sourcecode">c</span> in 
+  <span class="register">s2</span>, and return its value in 
+  <span class="register">s0</span> (overwriting half of
+  <span class="sourcecode">b</span>).</P>
+<P>The best documentation for floating point intructions, as used by GCC
+  and GDB, is in the 
+   <a href="../intro.html#ref" target="intro">ARM Developer Suite Assembler Guide</a>.
+  Newer instructions exist than the ones documented there, 
+  but instructions in this Guide match those used by the compiler.</P>
+<P>This program is shown in two versions: 
+  <a href="t9v0.c" target="t9v0">t9v0.c</a> and 
+  <a href="t9v1.s" target="t9v1">t9v1.s</a>.
+  both programs link with 
+  <a href="t9m.cpp" target="t9m">t9m.cpp</a>, and
+  both perform the same arithmetic. In a later tutorial, we are going to write
+  more sophisticated versions of the function, and run each version on the same
+  large data set so that we can compare performance. Let's begin with 
+  <a href="t9v0.c" target="source">t9v0.c</a>:</P>
+<div class="hangingindent"> 
+  <P>8: The dot product of two vectors, X &bull; Y, is computed by multiplying
+    each pair of elements together and summing the result. Thus, { 1, 2, 3 } &bull; {
+    4, 5, 6 } = 1*4 + 2*5 + 4*6 = 4 + 10 + 24 = 38.</P>
+  <P>11: As typical, we represent a vector X of length N by an array beginning
+    at <span class="sourcecode">X[0]</span> and ending at <span class="sourcecode">X[N-1]</span>.</P>
+  <P>9, 12, 14: Again typically, we initialize  the local variable <span class="sourcecode">sum</span> to zero,
+     use it to keep a running total as we progress through the loop, and return
+    its value when the loop completes.</P>
+</div>
+<P>With 
+  <a href="t9v0.c" target="t9v0">t9v0.c</a> as a guide, we can read the assembly in 
+  <a href="t9v1.s" target="t9v1">t9v1.s</a> more easily:</P>
+<P class="hangingindent">16: We use 
+  <span class="register">d0</span> to hold 
+  <span class="sourcecode">sum</span>,
+  since that's the value we  return.</P>
+<P class="hangingindent">17: This line is commented out because it does not always
+  work. It would safe and efficient to clear an integer register value with 
+  <span class="sourcecode">sub r0, r1, r1</span>,
+  but the same is not true of floating point registers. If a register 
+  <span class="register">d1</span> contains
+  <span class="sourcecode">INF</span> or <span class="sourcecode">NaN</span>, then 
+  <span class="sourcecode">d1 - d1 = NaN</span>. The best practice  is to initialize
+  floating point registers from memory.</P>
+<P class="hangingindent">20-23, 26-27: Pointers are always stored in integer
+  registers, no matter the data to which they point. Double-precision operands
+  are 8 bytes, hence the need to advance the pointers by 8 each iteration. Post-indexed
+  addressing would be helpful here, but ARM does not support this mode for floating
+  point
+  memory operations.</P>
+<P class="hangingindent">24-25: <span class="sourcecode">fmuld</span> and <span class="sourcecode">faddd</span> are very similar to their integer
+  counterparts, in syntax and execution.</P>
+<P>A few notes about <a href="gdb.ini" target="gdb">gdb.ini</a> are also appropriate here:</P>
+<P class="hangingindent">5-6: Since 
+  <span class="register">r0</span> and 
+  <span class="register">r1</span> point to vectors, these commands
+  display the first four elements of each vector. The
+  <span class="sourcecode">/_fg</span> suffix
+  designates 
+  <span class="sourcecode"><u>f</u></span>loating
+  point display of 
+  <span class="sourcecode"><u>g</u></span>iant
+  (8 byte) operands; the format for single-precision would be 
+  <span class="sourcecode">/_fx</span>.</P>
+<P class="hangingindent">7-11: When referring directly to registers, 
+  <span class="sourcecode">/f</span> is
+  sufficient to display their floating-point values.  The command 
+  <span class="sourcecode">display/s $s0</span> 
+  would display the value of the single-precision register.</P>
+<P>The main program in 
+  <a href="t9m.cpp" target="t9m">t9m.cpp</a> has a lot
+  of bells and whistles, associated with reading
+  vector input and identifying multiple versions.  Here are a few things to notice:</P>
+<P class="hangingindent">20, 25, 41, 46-56: Since we're going to compare multiple versions of the same
+  function, it's nice to be reminded which version is running. When a C/++ program
+  executes,
+  <span class="sourcecode">argv[]</span> is an array of strings, the first of
+  which is the path to the program. So, for example, when a user invokes 
+  <span class="userTyped">./t9v0</span>, 
+  <span class="sourcecode">argv[0]</span> may
+  equal 
+  <span class="sourcecode">/home/<script>writeUserName()</script>/tutorials/t9/t9v0</span>.
+  The baseName function extracts <span class="sourcecode">t9v0</span> from the path name.</P>
+<P class="hangingindent">21, 29, 58-74: The <span class="sourcecode">readVectors()</span> function
+  prompts for the length of the vectors, then for each element of each vector. The
+   I/O was moved here to keep the main program simple. The arguments <span class="sourcecode">&amp;X</span>, <span class="sourcecode">&amp;Y</span>,
+  and <span class="sourcecode">&amp;N</span> are passed by reference, so that
+  their values can be set within the function. (For compatibility with later
+  versions, the size allocated to each vector is actually rounded up to the nearest
+  multiple of 4, and zeroes fill the extra slots.)</P>
+<P class="hangingindent">22, 59, 76-82: We need long vectors to test performance, but typing in more
+  than a few values is extremely tedious. This program is designed to read input
+  redirected from a file as well as the terminal. The getPrompt() function figures
+  out where
+  the input is coming from; and assigns prompts accordingly. If input is the
+  terminal, prompts are displayed as usual, but if input is a file,
+  the prompts disappear into <span class="sourcecode">/dev/null</span>, colloqually
+  known as the <span class="sourcecode">bitbucket</span>.</P>
+<P class="hangingindent">29-37: Aside from all the I/O, this program is very
+  simple! To time the function accurately, we call <span class="sourcecode">clock_gettime()</span> before
+  and after the method as we did in 
+  <script>writeNamedTutorial('fib1')</script>.</P>
+<P>Make and run <span class="sourcecode">t9v0</span>, and try it with two short
+  vectors. Do the same with <span class="sourcecode">t9v1</span>, and verify
+  that it computes the same dot product for the same pair of vectors. (Because
+  this program exists
+  in multiple versions, you cannot simply make or run <span class="sourcecode">t9</span>;
+  the correct commands are <span class="userTyped">make t9v0 &amp;&amp; ./t9v0
+  &amp;&amp; make t9v1 &amp;&amp; ./t9v1</span>.)</P>
+<P>Debug <span class="sourcecode">t9v1</span>, set the breakpoint in <span class="sourcecode">dotProd</span>,
+  and supply the same input. As you step through the instructions, you should
+  see the floating-point values copied from memory into 
+  <span class="register">d2</span> and 
+  <span class="register">d3</span>, 
+  their products computed in 
+  <span class="register">d4</span>, 
+  and the sum accumulate in 
+  <span class="register">d0</span>.</P>
+<P><b>Self-Test</b></P>
+<ol>
+  <li>(1) Trace the execution of <span class="sourcecode">DotProd()</span>,
+    version 1, on the vectors {3, 4} and {5,
+    6}. Show each value stored into register 
+    <span class="register">d0</span>
+    as the program executes.</li>
+  <li>(1) Trace the execution of <span class="sourcecode">DotProd()</span>, version
+    1, on the vectors {3, 4} and {5, 6}. Show each value stored into register 
+    <span class="register">d3</span> 
+    as the program executes.</li>
+  <li>(2) What would happen if the 
+    <span class="sourcecode">add</span>
+    instuctions in lines 26-27 were omitted? Propose sample input and the result.</li>
+  <li>(1) What would happen if the <span class="sourcecode">subs</span> instuction
+  in line 28 were omitted?</li>
+</ol>
+<P><b>Assignments</b></P>
+<P>For each assignment, submit <b>t9s</b><u><em>x</em></u><b>v1.s</b>,  <b>t9s</b><u><em>x</em></u><b>m.cpp</b>,
+  and a log file <b>t9s</b><u><em>x</em></u><b>v1.log</b> that shows corrrect
+  computation of a data sample. The version infix <strong>v1</strong> is
+  important, because you will write additional versions later. You do not have
+  to write  the C version, <b>t9s</b><u><em>x</em></u><b>v0.c</b>,
+  but you may find it helpful to do so.</P>
+<ol class="assignment">
+  <li>Revise 
+    <span class="sourcecode">dotProd()</span> 
+    to use register indexing, e.g. 
+    <span class="sourcecode">[r0, r2, lsl #3]</span>, 
+    eliminating the need to change 
+    <span class="register">r0</span> and 
+    <span class="register">r1</span>.</li>
+  <li>Revise <span class="sourcecode">dotProd()</span> to use single-precision
+  vectors, and return a single-precision result.</li>
+  <li>Write <span class="sourcecode">double sum(double X[], int N)</span>, which
+    returns the sum of all the elements in array <span class="sourcecode">X[]</span>.</li>
+  <li>Write <span class="sourcecode">float sum(float X[], int N)</span>, which
+  returns the sum of all the elements in array <span class="sourcecode">X[]</span>.</li>
+  <li>Write <span class="sourcecode">vectorAdd(double X[], double Y[], int N)</span>,
+    which computes <span class="sourcecode">X[i]=X[i]*Y[i]</span>, and stores
+    each result back in <span class="sourcecode">X[i]</span>.</li>
+  <li>Write <span class="sourcecode">vectorAdd(float X[], float Y[], int N)</span>,
+    which computes <span class="sourcecode">X[i]=X[i]*Y[i]</span>, and stores
+  each result back in <span class="sourcecode">X[i]</span>.</li>
+  <li>Write <span class="sourcecode">scalarMult(double X[], int N, double A)</span>, which computes <span class="sourcecode">X[i]=X[i]*A</span>,
+    and stores each result back in <span class="sourcecode">X[i]</span>.</li>
+  <li>Write <span class="sourcecode">scalarMult(float X[], int N, float A)</span>,
+    which computes <span class="sourcecode">X[i]=X[i]*A</span>, and stores each
+  result back in <span class="sourcecode">X[i]</span>.</li>
+  <li>Write <span class="sourcecode">normalize(double X[], int N)</span>,
+    which normalizes the 
+    vector <span class="sourcecode">X[]</span> so that its leading coefficient is 1, and the rest of its
+    values change proportionally.</li>
+  <li>Write <span class="sourcecode">normalize(float X[], int N)</span>, which
+    normalizes the vector <span class="sourcecode">X[]</span> so that its leading
+    coefficient is 1, and the rest of its values change proportionally.</li>
+</ol>
+<script>writeFooter()</script>
+</BODY>
+</HTML>

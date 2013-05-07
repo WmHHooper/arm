@@ -1,0 +1,3 @@
+export USERMACH=hooper@172.16.22.53
+export DESTPATH=/home/hooper/zip/zaurus/tutorials
+export DESTPATH=zip/csc211/public/tutorials

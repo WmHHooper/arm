@@ -1,0 +1,150 @@
+<HTML>
+<HEAD>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<script>wTitle()</script>
+</HEAD>
+<body>
+<h1>t4: Addressing Modes, Part II</h1>
+<script>wNavbar()</script>
+<p> This tutorial illustrates the <I>auto-indexed mode</I> of addressing, the 
+  other major form of indirect addressing on the ARM processor. This mode is important 
+  for structured data, such as arrays or files of records, and it is also important 
+  as a way of manipulating the stack. </p>
+<P>Link the files 
+  <a href="t4.s" target="t4">t4.s</a> and 
+  <a href="t4m.cpp" target="t4m">t4m.cpp</a> into 
+  your project and examine them. First, some notes on 
+  <a href="t4m.cpp" target="t4m">t4m.cpp</a>:</P>
+<div class="hangingindent"> 
+  <P>16-20: This is a conventional C++ record definition. The fields within this 
+    record are arranged as follows:</P>
+  <P ALIGN="CENTER"><IMG SRC="Image5.gif" WIDTH=290 HEIGHT=30></P>
+  <P>&#9;For example, the "name" field occupies bytes 0 through 6, etc. The gray 
+    bytes between fields reflect the <I>alignment</I> of records. Thus, a byte 
+    is skipped so that the "score" field will begin on an even byte, and two bytes 
+    are skipped so that the id will begin on a location divisible by four.</P>
+  <P>22-30: The array CSC123[ ] contains seven records. This multi-line declaration
+     sizes the array and initialize its contents at the same time. Together,
+    the  array declaration and the structure definition produce a data structure
+    with  the layout:</P>
+  <P ALIGN="CENTER"><IMG SRC="image6.png" WIDTH=366 HEIGHT=41></P>
+  <P>30: The Scores[] array is seven short integers, two bytes each.</P>
+  </div>
+  
+<p>The rest of the program is a little different from the other tutorials, in
+  that it asks for no input other than an Enter to proceed. The important part
+  is that it calls CopyScores to copy each score from the CSC123[ ]array to the
+Scores[ ] array. </p>
+<p>The implementation of CopyScores, in 
+  <a href="t4.s" target="t4">t4.s</a> is more interesting.
+  When the function is called,
+  <span class="register">r0</span> contains
+  N, while registers <span class="register">r1</span> 
+  and <span class="register">r2</span> point to the beginning of arrays S[ ] and R[ ], respectively. 
+</p>
+<div class="hangingindent"> 
+  <p>15: This rather odd instruction causes <span class="register">r2</span> to point behind the array, to
+    the field R[-1].score.  We'll see why--I promise!</p>
+  <p>16: This load instruction illustrates <i>pre-increment</i> addressing. 16
+     is added to <span class="register">r2</span> get the effective address of the object R[0].score,
+      which is loaded into <span class="register">r3</span>. The exclamation point (!) causes the new
+      address  to be written back into <span class="register">r2</span> as a side effect of the instruction.
+      The  next time around the loop, the instruction will compute the effective
+      address  of R[1].score, and so on. Note that the <span class="sourcecode">h</span> prefix in
+      this instruction  causes it to load a half-word (16 bits), rather than
+      the default full-word  (32) bits.</p>
+  <P>18: This instruction illustrates <i>post-increment</i> addressing. The value 
+    in 
+    <span class="register">r3</span> is stored in the address at 
+    <span class="register">r1</span>, without any adjustment. 
+    Meanwhile 
+    <span class="register">r1</span>
+    is being updated by adding 2. Thus the value is being 
+    stored at the S[0], while the register is updated to point to S[1]. The next 
+    time around the loop, the value will store at S[1] while the register moves 
+    to S[2], and so on.</P>
+</div>
+<P> Compile and run the program. The output is simply a one-line list of the
+  array 
+  <span class="sourcecode">Scores</span>, to which the scores were copied from
+  the <span class="sourcecode">CSC123</span> array. Run the gdb 
+  debugger on the program, setting a breakpoint at CopyScores. The .gdbinit file
+   has been set up to show values similar to the following:</P>
+<pre>...
+6: x/8xb $r1
+0x112f8 &lt;Scores>:    0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+5: x/32xb $r2
+0x11164 &lt;CSC123>:    0x41 0x6e 0x6e 0x61 0x00 0x00 0x00 0x00
+0x1116c &lt;CSC123+8>:  0x5b 0x00 0x00 0x00 0x9c 0x58 0x26 0x15
+...</pre>
+<p>The array S[ ] to which 
+<span class="register">r1</span> points is initally zeroed--a behavior which
+is  NOT guaranteed! The first record of R[ ] begins with the ASCII characters
+'A',  'n', 'n', and 'a', just as we would expect. Eight bytes from the beginning
+of  the record, we find the value 91 (=0x5b) stored in little-endian order. Stepping
+ forward twice, we subtract 8, then add 16 to 
+  <span class="register">r2</span>, while putting the halfword 
+  in <span class="register">r3</span>:</p>
+<pre>...
+5: x/32xb $r2
+0x1116c &lt;CSC123+8>:  0x5b 0x00 0x00 0x00 0x9c 0x58 0x26 0x15
+...
+4: /x $r3 = 0x5b
+...</pre>
+The value <span class="sourcecode">0x5b</span> appears to have moved,
+but if you check the addresses you can verify that the memory location hasn't
+changed, only the value of 
+<span class="register">r2</span>. Step again, and we should see 
+<span class="register">r3</span> stored in S[0]--but
+we don't because 
+<span class="register">r1</span> no longer points to S[0]. If we continue to step through
+the loop, we will see 
+<span class="register">r2</span> advance 1 record at a time, until we continue.
+<P><b>Self-Test</b></P>
+<ol>
+  <li> (2) Suppose the value initially assigned by function CopyScores() to register 
+    <span class="register">r1</span>
+    is 0300000016. List each susbequent value assigned to register 
+    <span class="register">r1</span>,
+    during the execution of the function.</li>
+  <li> (2) Suppose the value initially assigned by function CopyScores() to
+    register 
+    <span class="register">r2</span>
+    is 03000FFC16. List each susbequent value assigned to register 
+    <span class="register">r2</span>,
+    during the execution of the function.</li>
+  <li> (1) Change this function to eliminate update mode addressing.</li>
+  <li> (1) Change this function, so that both indexed mode instructions use
+    update.</li>
+</ol>
+<P><b>Assignments</b></P>
+<ol class="assignment">
+  <li>Rewrite NoCaps() from
+    <script>writeNamedTutorial('nocaps')</script>, 
+    to use immediate indexing with update.</li>
+  <li>Rewrite the CopyScores() procedure to use register indexing,
+    as in
+    <script>writeNamedTutorial('nocaps')</script>, 
+    </li>
+  <li> Change the length of the "name" field to 14 bytes. Change all
+    lines in either program that are affected.</li>
+  <li> Change the program to copy ID's rather than scores. Change all
+    lines in either program that are affected.</li>
+  <li> Write function FindID(int N, record R[], int I), which returns
+    the index of the record with field "id" equal to I. It should return -1 if
+    the id is not found. Modify the C++ program to prompt for an id, call the
+    function, and display the result.</li>
+  <li> Write function FindName(int N, record R[], char S[]), which returns
+    the index of the record with field "name" equal to S. It should return -1
+    if the name is not found. Modify the C++ program to prompt for a name, call
+    the function, and display the result. (Hint: Use the solution to 3e.)</li>
+  <li> Write procedure SwapRec(record R[], int N, int M), which swaps
+    records N and M within array R[]. Modify the C++ program to prompt for two
+    integers and call the procedure. Print the records before and after the call,
+    so that we can see the swapped records.</li>
+</ol>
+<script>writeFooter()</script>
+</BODY>
+</HTML>

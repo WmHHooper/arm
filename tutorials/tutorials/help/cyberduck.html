@@ -1,0 +1,95 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<title>Editing with WinSCP</title>
+</head>
+
+<body>
+<h1>Editing remote files with CyberDuck and TextWrangler</h1>
+<p>
+  <script>wNavbar()</script>
+</p>
+<ol>
+  <li>Install tools:
+    <ol>
+      <li>Download and install TextWrangler from:<br />
+        <a href="http://www.barebones.com/products/textwrangler/" target="download">http://www.barebones.com/products/textwrangler/</a></li>
+      <li>Download and install Cyberduck from:<br />
+      <a href="http://cyberduck.ch/" target="download">http://cyberduck.ch/</a></li>
+      <li>Launch  Cyberduck, and choose <strong>Preferences...</strong> from
+        the Cyberduck menu. Configure Cyberduck to work with TextWrangler by
+        choosing it in the Edit Preferences, as shown below:<br />
+      <img src="images/cyberduck-prefs.png" width="509" height="251" alt="prefs" />      </li>
+    </ol>
+  </li>
+  <li>Connect to the CSC File Server:
+    <ol>
+      <li>Launch Cyberduck. The main connection window will show a list of previous
+        connections (which will be empty if you have not used Cyberduck before).
+        Click the button that says &quot;Open Connection&quot; and you should reach the
+        host selection window below:<br />
+      <img src="images/cyberduck-connect.png" width="605" height="524" alt="winscp" />        </li>
+      <li>Enter <strong>csc.belmont.edu</strong> as the Host Name, and be sure
+        to select the <strong>SFTP</strong> Protocol. Cyberduck should select
+        Port number 22 automatically when you select <strong>SFTP</strong>. Enter
+        your User name and password, then click the <strong>Connect</strong> button.
+        The first time you do this, you will be prompted to accept the host key
+        from the CSC Server. Click <strong>Yes</strong>, and you should see a
+      new screen like the following:<br />
+      <img src="images/cyberduck-home.png" width="524" height="280" alt="home" /></li>
+    </ol>
+  </li>
+  <li>Navigate to the tutorial.</li>
+  <ol>
+    <li>Double-click the private folder. The address will change to &quot;/home/csc/<em>username</em>/private/&quot;
+      window will change to show the contents of your public folder.</li>
+    <li>Double-click the csc2110 folder. Note the change in address and view.</li>
+    <li>Double-click the tutorials folder. Note the change in address and view.</li>
+    <li>Double-click the  folder for your current tutorial. The address should read &quot;/home/csc/<em>username</em>/private/csc2110/tutorials/t<em>N</em>/&quot;,
+      where N is the letter of your tutorial, and the folder window should
+      display the files for your tutorial. The folder for Tutorial 0 is shown
+      below as an example.<br />
+    <img src="images/cyberduck-t0.png" width="494" height="279" alt="t0" />      </li>
+  </ol>
+  <li>Edit files:
+    <ol>
+      <li>To edit a file, for example t0m.cpp, right-click the file and choose
+        <strong>Edit With -&gt; TextWrangler</strong> from the pop-up menu. An
+        editor window appears
+        like the one below:<br />
+      <img src="images/textwrangler.png" width="404" height="188" alt="edit" />      </li>
+      <li>Note the line numbers along the left side of the window. As you
+        debug files,  line numbers will guide you to checkpoints and errors.</li>
+      <li>The write icon <img src="images/textwrangler-icon.jpg" alt="disk" width="9" height="9" align="bottom" />,
+        on the left side of the toolbar, is white when the file you are editing
+        is in sync with the copy on the Playstation 3, but turns black when you
+        make changes that have not yet been saved. Normally, you will want to
+        save early and often! Each time you save changes, the notification &quot;<strong>File
+        Uploaded</strong>&quot; should appear in the upper right corner of your Macintosh
+        desktop.</li>
+      <li>You can open as many edit windows as you need to do the tutorial, and
+        leave them open as long as you need. Close
+        the edit windows when you are done; you
+        will be prompted to save any final changes.</li>
+    </ol>
+  </li>
+  <li>Disconnect
+    <ol>
+      <li>Before you disconnect, be sure that all your remote TextWrangler windows
+        are closed. If you forget this step,  changes to your TextWrangler
+        files may not be written to the PlayStation 3.</li>
+      <li>Choose <strong>Quit</strong> from the <strong>Cyberduck</strong> menu. Cyberduck
+        will close without confirmation. To resume, return to step 2.1 .</li>
+      <li>If you leave your computer while the <strong>Cyberduck</strong> window is open, it will
+        eventually disconnect from the server on its own. When you return, you
+        will be prompted to restore the connection; however, you will have to
+        wait for the connection to be re-established, and you may have to return
+        to Step 2.1 in order to complete the connection.</li>
+    </ol>
+  </li>
+</ol>
+<script>writeFooter()</script>
+</body>
+</html>

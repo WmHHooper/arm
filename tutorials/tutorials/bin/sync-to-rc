@@ -1,0 +1,12 @@
+export USERMACH=hooper@172.16.22.53
+export DESTPATH=/home/hooper/zip/zaurus/tutorials
+export USERMACH=local@192.168.1.83
+export DESTPATH=/home/local/tutorials
+export USERMACH=172.16.20.185
+export USERMACH=local@172.16.20.185
+export USERMACH=local@192.168.1.83
+export USERMACH=172.16.20.185
+export USERMACH=local@172.16.20.185
+export USERMACH=local@192.168.1.83
+export USERMACH=local@hs185
+export USERMACH=local@192.168.1.83

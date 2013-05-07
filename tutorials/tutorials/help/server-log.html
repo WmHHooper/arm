@@ -1,0 +1,68 @@
+<html>
+  <head>
+    <meta content="text/html; charset=UTF-8" http-equiv="content-type">
+    <link href="../resources/styles.css" rel="stylesheet" type="text/css">
+    <script src="../resources/tutorials.js"></script>
+    <script>wTitle()</script>
+  </head>
+  <body>
+    <h1>Using the 
+      <script>writeLongMachineName()</script>
+as a Class Fileserver</h1>
+    <p>
+      <script>wNavbar()</script>
+    </p>
+    <p>This narrative describes the process I used to set up the
+      <script>writeLongMachineName()</script> as a lab server. These steps
+      belong after those described in the <a href="installation-log.html" target="ref">installation
+        log</a>. </p>
+    <ol>
+      <li>Installed nfs, to access student/faculty accounts on the fileserver
+        <pre>[root@alarmpi ~]# <span class="userTyped">pacman -S libnfs</span>
+:: Synchronizing package databases...
+...
+[root@alarmpi ~]# <span class="userTyped">pacman -S nfs-utils</span>
+:: Synchronizing package databases...
+...
+[root@alarmpi ~]#
+      </pre>
+      </li>
+      <li>Added server definitions to the host table (I don't have DNS working
+        on my LAN):
+        <pre>[root@alarmpi ~]# <span class="userTyped">cp /etc/hosts /etc/hosts-YYYY-MM-DD~</span>
+[root@alarmpi ~]# <span class="userTyped">rsync -av user@workstation:/etc/hosts /etc/</span>
+...
+Are you sure you want to continue connecting (yes/no)? yes
+...
+sent 36 bytes  received 8285 bytes  1109.47 bytes/sec
+...
+[root@alarmpi etc]# </pre>
+        Added mount point to the file system table (using the <span class="sourcecode">fileserver</span>
+        nickname):
+        <pre>[root@alarmpi ~]# <span class="userTyped">cp /etc/fstab /etc/fstab-YYYY-MM-DD~</span>
+[root@alarmpi ~]# <span class="userTyped">cat &gt;&gt; /etc/fstab &lt;&lt; done
+fileserver:/home/csc    /home/csc       nfs     exec,dev,suid,soft  0 0
+done</span>
+[root@alarmpi ~]# </pre>
+        Set up the NFS client to map file owners:
+        <pre>[root@alarmpi ~]# <span class="userTyped">cd /etc/conf.d/</span>
+[root@alarmpi conf.d]# <span class="userTyped">cp nfs-common.conf nfs-common.conf-YYYY-MM-DD~</span>
+[root@alarmpi ~]# <span class="userTyped">nano nfs-common.conf
+...
+NEED_IDMAPD="YES"
+...</span>
+[root@alarmpi ~]# </pre>
+        Mounted the home directories:
+        <pre>[root@alarmpi ~]# <span class="userTyped">mkdir /home/csc</span>
+[root@alarmpi ~]# <span class="userTyped">mount /home/csc</span>
+[root@alarmpi ~]# </pre>
+        Mounted the home directories:
+        <pre>[root@alarmpi ~]# <span class="userTyped">cd /etc/conf.d/</span>
+...
+[root@alarmpi ~]# </pre>
+      </li>
+      <li>to be continued...</li>
+    </ol>
+<script>writeFooter()</script>
+  </body>
+</html>

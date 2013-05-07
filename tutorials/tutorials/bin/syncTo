@@ -1,0 +1,19 @@
+#!/bin/bash
+source .syncTorc
+
+echo -n "user@machine [$USERMACH]: "
+read RESPONSE
+if [ "$RESPONSE" != "" ]
+then
+        export USERMACH=$RESPONSE
+        echo "export USERMACH=$RESPONSE" >> .syncTorc
+fi
+
+echo -n "remote path [$DESTPATH]: "
+read RESPONSE
+if [ "$RESPONSE" != "" ]
+then
+        export DESTPATH=$RESPONSE
+        echo "export DESTPATH=$RESPONSE" >> .syncTorc
+fi
+rsync -e ssh -Cavub --delete --delete-after ./ $USERMACH:$DESTPATH

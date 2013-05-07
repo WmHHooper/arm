@@ -1,0 +1,31 @@
+bin/allclean
+mv t0/t0m.cpp t0/t0m.cpp~
+sed 's/fib/Fib/g' < t0/t0m.cpp~ > t0/t0m.cpp
+#set -x
+for t in t?
+do
+  (cd $t
+    echo $t:
+    grep -ql $t.[sc] makefile || \
+    [ -f $t.s ] || [ -f $t.c ] && {
+      make $t \
+      && ./$t < program-input.txt \
+      && gdb -q $t < debugger-input.txt
+    }
+    
+    for vs in ${t}v?.[sc]
+    do
+      [ -f $vs ] || continue
+      ve=`echo $vs | sed 's/\.[sc]//'`
+      echo $ve:
+      make $ve \
+      && ./$ve < program-input.txt
+    done
+    
+    [ -f ${t}v1.s ] && {
+      echo ${t}v1:
+      make ${t}v1 \
+      && gdb -q ${t}v1 < debugger-input.txt
+    }
+  )
+done

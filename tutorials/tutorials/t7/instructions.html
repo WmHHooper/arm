@@ -1,0 +1,89 @@
+<HTML>
+<HEAD>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<script>wTitle()</script>
+</HEAD>
+<body>
+<h1>t7: Optimization 1</h1>
+<script>wNavbar()</script>
+<P>This tutorial builds on the code from 
+  <script>writeNamedTutorial('fib1')</script>
+  and 
+  <script>writeNamedTutorial('fib2')</script>, 
+  by implementing
+  the  Fibonacci program in a way that is somewhat faster, but still fully recursive.
+   By removing many of the redundant instructions from the compiler-generated
+  code,  this program is intended to clarify the essential ones, and to introduce
+  some  simple principles of code optimization. To follow the commentary, you
+  will want  to open the files 
+  <a href="../t0/t0.c"s" target="t0">../t0/t0.c</a>, 
+  <a href="../t6/t6.s" target="t6">../t6/t6.s</a>,
+  and 
+  <a href="t7.s" target="t7">t7.s</a> so that you can compare these files easily. Some
+  lines you should notice in 
+  <a href="t7.s" target="t7">t7.s</a> are:</P>
+<blockquote> 
+  <p>19-22: If we are dealing with the basis case (i &lt; 2), don't bother building
+     a stack frame. Just put the return value into <span class="register">r0</span> and return.</p>
+  <p>25-27: These lines are similar to lines 22-25 of 
+    <a href="../t6/t6.s" target="t6">t6.s</a>. We do NOT 
+    want to interfere with the essential stack frame mechanism. We save one instruction
+    by pushing <span class="register">r0</span> 
+    (<span class="sourcecode">=i-1</span>)
+    onto the stack at the same time as 
+    <span class="register">r11</span> and 
+    <span class="register">lr</span>. We add 4 to the stack pointer
+    to make one additional slot for 
+    <span class="sourcecode">j</span>
+    we don't need to save 
+    <span class="sourcecode">k</span> 
+    on the stack.</p>
+  <p>28: Because of the way the test was performed in line 17, 
+  <span class="register">r0</span> already
+     contains the value i - 1, so we are ready to call Fib(i - 1).</p>
+  <p>30-33: We save the value of j on the stack, then call Fib(i - 2). Note that 
+    since we saved the value of i&nbsp;-&nbsp;1 on the stack, rather than i, we 
+    only subtract 1 here.</p>
+  <p>35-38: We retrieve j off the stack, add to k (which is in <span class="register">r0</span> after the call
+     to Fib(i - 2)), and return. Note that the last two instructions are identical
+     to lines 47-48 of 
+     <a href="../t6/t6.s" target="t6">t6.s</a>.</p>
+</blockquote>
+<p>This program can be understood without resorting to the debugger. Change to
+  the t6 directory, make and run  t6, and enter progressively larger
+  values of N until it takes about three seconds to compute Fib(N). Then, make
+  and run t7, and enter the same value of N. The improved program should compute
+  the same result, but in much less time.</p>
+<P><b>Self-Test</b></P>
+<ol type="a">
+  <li>(8) How does the stack frame for this program differ from the one for 
+    <script>writeNamedTutorial('fib2')</script>? 
+    Refer to the stack frame for the previous tutorial, 
+    and sketch the equivalent stack frame
+    for this tutorial. 
+    (You should be able to do this without the debugger; but it's there
+    if you need it. :-)</li>
+  <li>(2) Revise the program, using the conditional instruction format of the
+    ARM to eliminate the <span class="sourcecode">bgt recursion</span>
+    instruction. Does the revised program run  faster or slower?</li>
+  <li>(2) Note that we didn't bother to optimize the main() program. Why not?</li>
+</ol>
+<P ALIGN="CENTER"></P>
+<p><b>Assignment</b></p>
+  
+<p> Take the disassembled function you created in the previous tutorial, and
+  rewrite it, eliminating unnecessary data movements. Typically, you can expect
+  to reduce the size and running time of your function by 50%, without affecting
+  the correctness of the algorithm. Make sure your improved version compiles
+  and links with your main program from t0. Submit your program as <b>t6s</b><i>x</i><b>.s</b>,
+  using the same letter <i>x</i> that
+  you used  to submit your program in 
+  <script>writeNamedTutorial('fib1')</script>. 
+  Run your revised program, and
+    copy the terminal session
+  into <b>t6s</b><i>x</i><b>.log</b>, and submit that as well.</p>
+<script>writeFooter()</script>
+</BODY>
+</HTML>

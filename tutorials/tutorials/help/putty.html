@@ -1,0 +1,87 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link href="../resources/styles.css" rel="stylesheet" type="text/css">
+<script src="../resources/tutorials.js"></script>
+<title>Connecting with PuTTY</title>
+</head>
+
+<body>
+<h1>Connecting to the 
+  <script>writeLongMachineName()</script>
+with PuTTY</h1>
+<script>wNavbar()</script>
+<ol>
+  <li>Download and install PuTTY from:<br />
+  <a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html" target="download">http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html</a> </li>
+  <li>Logging in:
+    <ol>
+      <li>Launch PuTTY. After the first-time user dialog, you should reach
+        the host
+        selection window below:<br />
+        <img src="images/putty.png" width="456" height="442" alt="putty" />  </li>
+      <li>Enter <strong>csc.belmont.edu</strong> as the Host Name, and be sure to select the <strong>SSH</strong> Protocol. Click
+        the <strong>Open</strong> button.  the first time you do this, you will be prompted to
+        accept the key from the CSC Server. Click <strong>Yes</strong>, and you should see a new
+        screen like the following:<br />
+        <img src="images/putty-terminal1.png" width="523" height="70" alt="term" />  </li>
+      <li>Respond to the login as: prompt with the UserName you were handed in
+        class. Respond
+        to the password prompt with your password. Notice that the password characters
+        are <em>not</em> echoed on the screen. When you login correctly, you
+        will see a last login message and a prompt &quot;[<em>userid</em>@hl36
+        ~]$ &quot; as
+        shown below:<br />
+      <img src="images/putty-terminal2.png" width="523" height="113" alt="term" />      </li>
+      <li>At this point, you are logged into the CSC Server, <span class="sourcecode">hl36</span>,
+        but you
+        have not yet reached the 
+        <script>writeLongMachineName()</script>
+        . Enter the command: <span class="userTyped">ssh <script language="">wDNS()</script></span>
+        to complete your login. You prompt should change to 
+        <span class="sourcecode">[<em>userid</em>@<script language="">wDNS()</script> ~]$ </span> 
+        as shown below:<br />
+        <img src="images/putty-terminal3.png" width="523" height="141" alt="term" /></li>
+      <li> At this point you are logged in and ready to begin the
+        lesson. As you work through the lessons, always be sure you are logged
+        into the 
+        <script>writeLongMachineName()</script>
+by checking for the <strong>
+        <script language="">
+wMAbr()
+        
+        </script>
+        </strong>        prompt.</li>
+    </ol>
+  </li>
+  <li>Logging out:
+    <ol>
+      <li>Since you are logged into two machines, you have to log out of both
+        machines in reverse order. To log out of the 
+        <script>writeLongMachineName()</script>, enter
+        the <span class="userTyped">exit</span> command at the
+        <strong>
+        <script language="">
+wMAbr()
+        
+        </script>
+        </strong>        prompt. Unlike the picture below,
+        the screen actually clears before you see the 
+        <span class="sourcecode">Connection ... closed.</span>
+        message and the <strong>hl36</strong> prompt.<br />
+      <img src="images/putty-logout.png" width="283" height="111" alt="logout" />      </li>
+      <li>Enter <span class="userTyped">exit</span> at the hl36 prompt. This will close your PuTTY
+        window and exit the application. To reconnect, launch PuTTY and begin
+        at step 2.1</li>
+      <li>If you leave your computer while the PuTTY window is open, it will
+        eventually disconnect from the server on its own. When you return, the
+        window title will include the word &quot;(inactive)&quot;, and the terminal
+        will not respond to anything you type. To resume, click the PuTTY icon <img src="images/putty-icon.jpg" alt="icon" width="18" height="18" align="top" /> and
+        choose &quot;Restart Session&quot; from the pop-up menu. You will then
+        need to resume at step 2.2 .</li>
+    </ol>
+  </li>
+</ol>
+<script>writeFooter()</script>
+</body>
+</html>
